@@ -36,6 +36,9 @@ namespace RGBTelegram.Services
                     case UpdateType.Message:
                         await ExecuteCommand("message", update, session);
                         break;
+                    case UpdateType.CallbackQuery:
+                        await ExecuteCommand("callback", update, session);
+                        break;
                 }
             }
             else
