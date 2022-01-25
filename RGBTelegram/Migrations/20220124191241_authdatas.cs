@@ -3,25 +3,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace RGBTelegram.Migrations
 {
-    public partial class AddedUser : Migration
+    public partial class authdatas : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                            name: "AuthDatas",
-                            columns: table => new
-                            {
-                                Id = table.Column<long>(type: "bigint", nullable: false)
-                                    .Annotation("SqlServer:Identity", "1, 1"),
-                                ChatId = table.Column<long>(type: "bigint", nullable: false),
-                                phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                                password = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                                CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                            },
-                            constraints: table =>
-                            {
-                                table.PrimaryKey("PK_AuthDatas", x => x.Id);
-                            });
+                name: "AuthDatas",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ChatId = table.Column<long>(type: "bigint", nullable: false),
+                    phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    password = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuthDatas", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Registrations",

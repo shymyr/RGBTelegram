@@ -28,7 +28,7 @@ namespace RGBTelegram.Commands
             {
                 case "":
                     await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Добро пожаловать в Бот!", ParseMode.Markdown);
-                    await _sessionService.Update(session);
+                    await _sessionService.Update(session, OperationType.registration);
                     break;
             }
         }

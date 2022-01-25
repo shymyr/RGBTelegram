@@ -46,7 +46,7 @@ namespace RGBTelegram.Services
             };
             await _context.UserSessions.AddAsync(newSession);
             await _context.SaveChangesAsync();
-            return sesion;
+            return newSession;
         }
 
         public async Task Delete(UserSession session)
@@ -55,9 +55,10 @@ namespace RGBTelegram.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task Update(UserSession session)
+        public async Task Update(UserSession session, OperationType operation)
         {
             session.dateTime = DateTime.UtcNow;
+            session.Type = operation;
             _context.UserSessions.Update(session);
             await _context.SaveChangesAsync();
         }

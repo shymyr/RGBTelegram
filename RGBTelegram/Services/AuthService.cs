@@ -18,13 +18,13 @@ namespace RGBTelegram.Services
             _context = context;
         }
 
-        public async Task<AuthData> GetOrCreate(long ChatId)
+        public async Task<AuthData> GetOrCreate(long ChatId, string phone = null)
         {
             var Auth = await _context.AuthDatas.FirstOrDefaultAsync(x => x.ChatId == ChatId);
 
             if (Auth != null) return Auth;
 
-            var result = await _context.AuthDatas.AddAsync(new AuthData() { ChatId = ChatId});
+            var result = await _context.AuthDatas.AddAsync(new AuthData() { ChatId = ChatId, phone = phone});
             await _context.SaveChangesAsync();
 
             return result.Entity;

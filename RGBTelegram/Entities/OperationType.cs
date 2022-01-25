@@ -9,8 +9,10 @@ namespace RGBTelegram.Entities
     {
         start = 1,
         auth = 2,
-        telNumber = 3,
-        Passw=4,
-        registration=5
+        telNumber = 21,
+        Passw=22,
+        registration=3,
+
+        menu = 6
     }
 }

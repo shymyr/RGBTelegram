@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using RGBTelegram.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace RGBTelegram.vpluse
 {
-    public class ServiceCall
+    public class ServiceCall : IServiceCall
     {
-        async static Task<HttpResponseMessage> CallService(StringContent content, string action, string methodType)
+        public async Task<HttpResponseMessage> CallService(StringContent content, string action, string methodType)
         {
             string apiBaseUrl = "https://staging-gateway.vpluse.me/";
             string endpoint = apiBaseUrl + action;
@@ -35,21 +36,20 @@ namespace RGBTelegram.vpluse
             }
             return Response;
         }
-        async static Task<string> AuthByPassword(AuthData auth)
+        public async Task<ErrorData> AuthByPassword(AuthData auth)
         {
-            string result = string.Empty;
+            ErrorData result = new ErrorData();
             StringContent content = new StringContent(JsonConvert.SerializeObject(auth), Encoding.UTF8, "application/json");
             var Response = await CallService(content, "v2/client/action/auth-by-password", "POST");
             switch (Response.StatusCode)
             {
                 case System.Net.HttpStatusCode.Created:
-                    result = await Response.Content.ReadAsStringAsync();
+                    result.success = true;
                     break;
                 case System.Net.HttpStatusCode.UnprocessableEntity:
                 case System.Net.HttpStatusCode.InternalServerError:
                     var resp = await Response.Content.ReadAsStringAsync();
-                    ErrorData error = JsonConvert.DeserializeObject<ErrorData>(resp);
-                    result = error.data.First().message;
+                    result = JsonConvert.DeserializeObject<ErrorData>(resp);
                     break;
             }
             return result;

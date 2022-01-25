@@ -11,7 +11,10 @@ namespace RGBTelegram
         {
         }
         public DataContext(DbContextOptions<DataContext> options) : base(options)
-        { Database.EnsureCreated(); }
+        {
+            Database.EnsureDeleted();
+            Database.EnsureCreated();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

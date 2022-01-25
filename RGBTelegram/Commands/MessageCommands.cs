@@ -1,5 +1,6 @@
 ﻿using RGBTelegram.Entities;
 using RGBTelegram.Services;
+using RGBTelegram.vpluse;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,13 @@ namespace RGBTelegram.Commands
     {
         private readonly TelegramBotClient _botClient;
         private readonly ISessionService _sessionService;
-        public MessageCommands(ISessionService sessionService, TelegramBot telegramBot)
+        private readonly IAuthService _authService;
+        private readonly IServiceCall _service;
+        public MessageCommands(ISessionService sessionService, IAuthService authService, IServiceCall service, TelegramBot telegramBot)
         {
             _sessionService = sessionService;
+            _authService = authService;
+            _service = service;
             _botClient = telegramBot.GetBot().Result;
         }
         public override string Name => "message";
@@ -36,7 +41,7 @@ namespace RGBTelegram.Commands
                          });
 
                     await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Добро пожаловать в Бот!", ParseMode.Markdown, replyMarkup: keyboard);
-                    await _sessionService.Update(session);
+                    await _sessionService.Update(session, OperationType.start);
                     break;
                 case "Авторизация":
                     var phone = new ReplyKeyboardMarkup(new[]
@@ -47,14 +52,44 @@ namespace RGBTelegram.Commands
                                                      }
                                                 });
                     await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Для авторизации отправьте номер телефона", ParseMode.Markdown, replyMarkup: phone);
-                    await _sessionService.Update(session);
+                    await _sessionService.Update(session, OperationType.auth);
                     break;
                 default:
-                    switch (session.Type)
+                    if (update.Message.Contact != null)
                     {
-                        case OperationType.Passw:
+                        await _authService.GetOrCreate(update.Message.Chat.Id, update.Message.Contact.PhoneNumber.Replace("+", ""));
+                        await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Укажите пароль:", ParseMode.Markdown,replyMarkup:null);
+                        await _sessionService.Update(session, OperationType.telNumber);
+                    }
+                    else
+                    {
+                        switch (session.Type)
+                        {
+                            case OperationType.telNumber:
+                                var data = await _authService.GetOrCreate(update.Message.Chat.Id);
+                                data.password = text;
+                                var call = await _service.AuthByPassword(data);
+                                if (call.success)
+                                {
+                                    var inlineKeyboard = new InlineKeyboardMarkup(new[]
+                                            {
+                                                new InlineKeyboardButton("Об акции"){Text="Об акции", CallbackData = "Promotion"},
+                                                new InlineKeyboardButton("Ввести код"){Text = "Ввести код", CallbackData = "Promocode"},
+                                                new InlineKeyboardButton("Правила акции"){Text = "Правила акции", CallbackData = "ProRule"},
+                                                new InlineKeyboardButton("Мои промокоды и призы"){Text = "Мои промокоды и призы", CallbackData = "MyPromocodes"},
+                                                new InlineKeyboardButton("Вопросы и ответы"){Text="Об акции", CallbackData = "Questions"}
+                                            });
 
-                            break;
+                                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Добро пожаловать! Нажмите на одну из кнопок ниже:", ParseMode.Markdown, replyMarkup: inlineKeyboard);
+                                    await _sessionService.Update(session, OperationType.menu);
+                                }
+                                else
+                                { 
+                                
+                                }
+
+                                break;
+                        }
                     }
                     break;
             }
