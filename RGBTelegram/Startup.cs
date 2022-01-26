@@ -33,6 +33,7 @@ namespace RGBTelegram
             services.AddSingleton<ISessionService, SessionService>();
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IServiceCall, ServiceCall>();
+            services.AddSingleton<IRegService, RegService>();
             services.AddSingleton<BaseCommand, MessageCommands>();
             services.AddSingleton<BaseCommand, CallbackCommands>();
         }

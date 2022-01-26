@@ -12,7 +12,7 @@ namespace RGBTelegram.Entities
         telNumber = 21,
         Passw=22,
         registration=3,
-
+        regTelNumber=31,
         menu = 6
     }
 }

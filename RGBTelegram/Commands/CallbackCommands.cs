@@ -26,9 +26,21 @@ namespace RGBTelegram.Commands
             var text = update.CallbackQuery.Data;
             switch (text)
             {
-                case "":
-                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Добро пожаловать в Бот!", ParseMode.Markdown);
+                case "Promotion"://"Об акции"
+                    await _botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, "Добро пожаловать в Бот!", ParseMode.Markdown);
                     await _sessionService.Update(session, OperationType.registration);
+                    break;
+                case "Promocode":
+
+                    break;
+                case "ProRule": //"Правила акции"
+        
+                    break;
+                case "MyPromocodes"://"Мои промокоды и призы"
+
+                    break;
+                case "Questions"://"Вопросы и ответы"
+
                     break;
             }
         }

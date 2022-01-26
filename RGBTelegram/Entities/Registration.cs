@@ -7,6 +7,7 @@ namespace RGBTelegram.Entities
 {
     public class Registration: BaseEntity
     {
+        public long ChatId { get; set; }
         public string phone { get; set; }
         public string password { get; set; }
         public string first_name { get; set; }
