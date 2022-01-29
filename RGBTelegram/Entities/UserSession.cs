@@ -10,6 +10,7 @@ namespace RGBTelegram.Entities
     {
         [JsonIgnore]
         public AppUser User { get; set; }
+        public bool Authorized { get; set; }
         public long? UserId { get; set; }
         public DateTime dateTime { get; set; } = DateTime.UtcNow;
         public OperationType Type { get; set; }

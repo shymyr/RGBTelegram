@@ -31,42 +31,38 @@ namespace RGBTelegram.Commands
         public override async Task ExecuteAsync(Update update, UserSession session)
         {
             var text = update.Message.Text;
-
+            var mainMenu = new InlineKeyboardMarkup(new[]
+                                            {
+                                                new[]{ new InlineKeyboardButton("Главное меню") { Text = "Главное меню", CallbackData = "Menu" } }
+                                            });
             switch (text)
             {
                 case "/start":
-                    var keyboard =
-                         new ReplyKeyboardMarkup(new[]
-                         {
-                             new[] { new KeyboardButton("Авторизация") },
-                             new[] { new KeyboardButton("Регистрация") }
-                         });
-
-                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Добро пожаловать в Бот!", ParseMode.Markdown, replyMarkup: keyboard);
+                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Добро пожаловать в Бот! Здесь вы можете Нужен текст что будет здесь", ParseMode.Markdown, replyMarkup: mainMenu);
                     await _sessionService.Update(session, OperationType.start);
                     break;
                 case "Авторизация":
                     var phone = new ReplyKeyboardMarkup(new[]
                                            {
-                                                    new KeyboardButton("Отправить номер телефона")
+                                                    new KeyboardButton("Поделиться телефоном")
                                                      {
                                                         RequestContact = true
                                                      }
                                                 });
-                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Для авторизации отправьте номер телефона", ParseMode.Markdown, replyMarkup: phone);
+                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Отправьте свой номер телефона с помощью кнопки \"Поделиться телефоном\"", ParseMode.Markdown, replyMarkup: phone);
                     await _sessionService.Update(session, OperationType.auth);
                     break;
                 case "Регистрация":
                     var ph = new ReplyKeyboardMarkup(new[]
                                            {
-                                                    new KeyboardButton("Отправить номер телефона")
+                                                    new KeyboardButton("Поделиться телефоном")
                                                      {
                                                         RequestContact = true
                                                      }
                                                 });
                     await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Для регистрации отправьте номер телефона", ParseMode.Markdown, replyMarkup: ph);
-                    await _sessionService.Update(session, OperationType.registration);
-                    
+                    await _sessionService.Update(session, OperationType.regTelNumber);
+
                     break;
                 default:
                     if (update.Message.Contact != null)
@@ -79,9 +75,25 @@ namespace RGBTelegram.Commands
                         }
                         else
                         {
-                            if (session.Type == OperationType.registration)
+                            if (session.Type == OperationType.regTelNumber)
                             {
-                                await _regService.GetOrCreate(update.Message.Chat.Id, update.Message.Contact.PhoneNumber.Replace("+", ""));
+                                var call = await _service.CheckPhone(update.Message.Contact.PhoneNumber.Replace("+", ""));
+                                if (call.status == 200)
+                                {
+                                    if (!call.success)
+                                    {
+                                        await _regService.GetOrCreate(update.Message.Chat.Id, update.Message.Contact.PhoneNumber.Replace("+", ""));
+                                        await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Придумайте пароль, пароль должен содержать буквы(на латинице) и цифры. Минимум 6 символов", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                                        await _sessionService.Update(session, OperationType.regPass);
+                                    }
+                                    else
+                                    {
+                                        await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                                        await _sessionService.Update(session, OperationType.regPass);
+                                    }
+                                }
+                                else
+                                { }
                             }
                         }
                     }
@@ -106,8 +118,8 @@ namespace RGBTelegram.Commands
                                                 new[]{ new InlineKeyboardButton("Вопросы и ответы") { Text = "Вопросы и ответы", CallbackData = "Questions" } }
                                             });
 
-                                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Добро пожаловать! Нажмите на одну из кнопок ниже:", ParseMode.Markdown, replyMarkup: inlineKeyboard);
-                                    await _sessionService.Update(session, OperationType.menu);
+                                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Выберите необходимую операцию из нижеперечисленных кнопок:", ParseMode.Markdown, replyMarkup: inlineKeyboard);
+                                    await _sessionService.Update(session, OperationType.menu, authorised: true);
                                 }
                                 else
                                 {
@@ -116,7 +128,31 @@ namespace RGBTelegram.Commands
                                 #endregion
                                 break;
                             case OperationType.regTelNumber:
-
+                                await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Придумайте пароль, пароль должен содержать буквы(на латинице) и цифры. Минимум 6 символов", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                                await _sessionService.Update(session, OperationType.regPass);
+                                break;
+                            case OperationType.regPass:
+                                await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Укажите фамилию", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                                await _sessionService.Update(session, OperationType.regFName);
+                                break;
+                            case OperationType.regFName:
+                                await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Придумайте пароль, пароль должен содержать буквы(на латинице) и цифры. Минимум 6 символов", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                                await _sessionService.Update(session, OperationType.regLName);
+                                break;
+                            case OperationType.regLName:
+                                await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Придумайте пароль, пароль должен содержать буквы(на латинице) и цифры. Минимум 6 символов", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                                await _sessionService.Update(session, OperationType.regMName);
+                                break;
+                            case OperationType.regMName:
+                                await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Придумайте пароль, пароль должен содержать буквы(на латинице) и цифры. Минимум 6 символов", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                                await _sessionService.Update(session, OperationType.reggender);
+                                break;
+                            case OperationType.reggender:
+                                await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Придумайте пароль, пароль должен содержать буквы(на латинице) и цифры. Минимум 6 символов", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                                await _sessionService.Update(session, OperationType.regfamily_stat);
+                                break;
+                            default:
+                                await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Извините, я вас не понимаю. Выберите действию доступную вам!", ParseMode.Markdown, replyMarkup: mainMenu);
                                 break;
                         }
                     }

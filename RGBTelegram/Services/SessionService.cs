@@ -62,5 +62,14 @@ namespace RGBTelegram.Services
             _context.UserSessions.Update(session);
             await _context.SaveChangesAsync();
         }
+
+        public async Task Update(UserSession session, OperationType operation, bool authorised)
+        {
+            session.dateTime = DateTime.UtcNow;
+            session.Type = operation;
+            session.Authorized = authorised;
+            _context.UserSessions.Update(session);
+            await _context.SaveChangesAsync();
+        }
     }
 }

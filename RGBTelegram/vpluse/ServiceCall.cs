@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RGBTelegram.Entities;
 using System;
 using System.Collections.Generic;
@@ -53,6 +54,35 @@ namespace RGBTelegram.vpluse
                     break;
             }
             return result;
+        }
+
+        public async Task<ErrorData> CheckPhone(string phone)
+        {
+            ErrorData result = new ErrorData();
+            Phone contentphone = new Phone() { phone = phone };
+            StringContent content = new StringContent(JsonConvert.SerializeObject(contentphone), Encoding.UTF8, "application/json");
+            var Response = await CallService(content, "v2/client/check-phone", "POST");
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    var details = JObject.Parse(resp);
+                    result.success = true;
+                    result.success = bool.Parse(details["data"]["is_exist"].ToString());
+                    result.status = int.Parse(details["status"].ToString());
+                    
+                    break;
+                case System.Net.HttpStatusCode.UnprocessableEntity:
+                case System.Net.HttpStatusCode.InternalServerError:
+                    result = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    break;
+            }
+            return result;
+        }
+
+        public class Phone
+        {
+            public string phone { get; set; }
         }
     }
 }

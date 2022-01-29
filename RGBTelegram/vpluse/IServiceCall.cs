@@ -12,5 +12,7 @@ namespace RGBTelegram.vpluse
         //Task<HttpResponseMessage> CallService(StringContent content, string action, string methodType);
 
         Task<ErrorData> AuthByPassword(AuthData auth);
+
+        Task<ErrorData> CheckPhone(string phone);
     }
 }
