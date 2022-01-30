@@ -1,5 +1,6 @@
 ﻿using RGBTelegram.Entities;
 using RGBTelegram.Services;
+using RGBTelegram.vpluse;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,16 +16,21 @@ namespace RGBTelegram.Commands
     {
         private readonly TelegramBotClient _botClient;
         private readonly ISessionService _sessionService;
-        public CallbackCommands(ISessionService sessionService, TelegramBot telegramBot)
+        private readonly IRegService _regService;
+        private readonly IServiceCall _service;
+        public CallbackCommands(ISessionService sessionService, IServiceCall service, IRegService regService, TelegramBot telegramBot)
         {
             _sessionService = sessionService;
             _botClient = telegramBot.GetBot().Result;
+            _regService = regService;
+            _service = service;
         }
         public override string Name => "callback";
 
         public override async Task ExecuteAsync(Update update, UserSession session)
         {
             var text = update.CallbackQuery.Data;
+            Registration registration = new Registration();
             var mainMenu = new InlineKeyboardMarkup(new[]
                                             {
                                                 new[]{ new InlineKeyboardButton("Главное меню") { Text = "Главное меню", CallbackData = "Menu" } }
@@ -94,6 +100,58 @@ namespace RGBTelegram.Commands
                 case "Questions"://"Вопросы и ответы"
                     await _botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, "Ждём текст или событию про Вопросы и ответы!", ParseMode.Markdown, replyMarkup: mainMenu);
                     await _sessionService.Update(session, OperationType.Questions);
+                    break;
+                case "fam1":
+                case "fam2":
+                case "fam3":
+                case "fam4":
+                    var ss = text.ToCharArray().Last();
+                    registration = await _regService.GetOrCreate(update.CallbackQuery.Message.Chat.Id);
+                    await _regService.Update(registration, update.CallbackQuery.Message.Chat.Id, family_stat: ss.ToString());
+
+
+                    var regions = await _service.GetRegions();
+                    if (regions.status == 200)
+                    {
+                        List<List<InlineKeyboardButton>> Buttons = new List<List<InlineKeyboardButton>>();
+                        regions.Items.ForEach(rr =>
+                        {
+                            Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton(rr.name) { Text = rr.name, CallbackData = rr.id.ToString() } });
+                        });
+                        var regs = new InlineKeyboardMarkup(Buttons);
+                        await _botClient.DeleteMessageAsync(update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId);
+                        await _botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, "Выберите регион:", replyMarkup: regs);
+                        await _sessionService.Update(session, OperationType.regcity);
+                    }
+                    break;
+                default:
+                    switch (session.Type)
+                    {
+                        case OperationType.regcity:
+                            registration = await _regService.GetOrCreate(update.CallbackQuery.Message.Chat.Id);
+                            await _regService.Update(registration, update.CallbackQuery.Message.Chat.Id, region_id: int.Parse(text));
+                            var cities = await _service.GetCities(registration.region_id);
+                            if (cities.status == 200)
+                            {
+                                List<List<InlineKeyboardButton>> Buttons = new List<List<InlineKeyboardButton>>();
+                                cities.Items.ForEach(rr =>
+                                {
+                                    Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton(rr.name) { Text = rr.name, CallbackData = rr.id.ToString() } });
+                                });
+                                var city = new InlineKeyboardMarkup(Buttons);
+                                await _botClient.DeleteMessageAsync(update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId);
+                                await _botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, "Выберите город:", replyMarkup: city);
+                                await _sessionService.Update(session, OperationType.regIIN);
+                            }
+                            break;
+                        case OperationType.regIIN:
+                            registration = await _regService.GetOrCreate(update.CallbackQuery.Message.Chat.Id);
+                            await _regService.Update(registration, update.CallbackQuery.Message.Chat.Id, city_id: int.Parse(text));
+                            await _botClient.DeleteMessageAsync(update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId);
+                            await _botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, "Укажите ИИН:", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                            await _sessionService.Update(session, OperationType.regSMS);
+                            break;
+                    }
                     break;
             }
         }

@@ -14,5 +14,9 @@ namespace RGBTelegram.vpluse
         Task<ErrorData> AuthByPassword(AuthData auth);
 
         Task<ErrorData> CheckPhone(string phone);
+
+        Task<Family> FamilyStatuses();
+        Task<Family> GetRegions();
+        Task<Family> GetCities(int regionId);
     }
 }

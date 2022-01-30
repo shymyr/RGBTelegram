@@ -70,7 +70,7 @@ namespace RGBTelegram.vpluse
                     result.success = true;
                     result.success = bool.Parse(details["data"]["is_exist"].ToString());
                     result.status = int.Parse(details["status"].ToString());
-                    
+
                     break;
                 case System.Net.HttpStatusCode.UnprocessableEntity:
                 case System.Net.HttpStatusCode.InternalServerError:
@@ -80,9 +80,94 @@ namespace RGBTelegram.vpluse
             return result;
         }
 
+        public async Task<Family> FamilyStatuses()
+        {
+            Family result = new Family();
+            var Response = await CallService(null, "v2/client/catalog/familyStatuses", "GET");
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    result.Items = new List<Item>();
+                    JObject details = JObject.Parse(resp);
+                    foreach (var item in details["data"]["items"].ToArray())
+                    {
+                        result.Items.Add(new Item() { id = int.Parse(item["id"].ToString()), name = item["name"].ToString() });
+                    }
+                    result.status = 200;
+                    result.success = true;
+                    break;
+                case System.Net.HttpStatusCode.UnprocessableEntity:
+                case System.Net.HttpStatusCode.InternalServerError:
+                    var err = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = err.data.First().message;
+                    break;
+            }
+            return result;
+        }
+
+        public async Task<Family> GetRegions()
+        {
+            Family result = new Family();
+            var Response = await CallService(null, "v2/client/catalog/regions/1", "GET");
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    result.Items = new List<Item>();
+                    JObject details = JObject.Parse(resp);
+                    foreach (var item in details["data"]["items"].ToArray())
+                    {
+                        result.Items.Add(new Item() { id = int.Parse(item["id"].ToString()), name = item["name_ru"].ToString() });
+                    }
+                    result.status = 200;
+                    result.success = true;
+                    break;
+                case System.Net.HttpStatusCode.UnprocessableEntity:
+                case System.Net.HttpStatusCode.InternalServerError:
+                    var err = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = err.data.First().message;
+                    break;
+            }
+            return result;
+        }
+
+        public async Task<Family> GetCities(int regionId)
+        {
+            Family result = new Family();
+            var Response = await CallService(null, $"v2/client/catalog/cities/{regionId}", "GET") ;
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    result.Items = new List<Item>();
+                    JObject details = JObject.Parse(resp);
+                    foreach (var item in details["data"]["items"].ToArray())
+                    {
+                        result.Items.Add(new Item() { id = int.Parse(item["id"].ToString()), name = item["name_ru"].ToString() });
+                    }
+                    result.status = 200;
+                    result.success = true;
+                    break;
+                case System.Net.HttpStatusCode.UnprocessableEntity:
+                case System.Net.HttpStatusCode.InternalServerError:
+                    var err = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = err.data.First().message;
+                    break;
+            }
+            return result;
+        }
+
         public class Phone
         {
             public string phone { get; set; }
         }
+
     }
 }
