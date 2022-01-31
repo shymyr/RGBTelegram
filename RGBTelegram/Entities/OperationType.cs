@@ -22,6 +22,7 @@ namespace RGBTelegram.Entities
         regregion = 35,
         regIIN = 36,
         regSMS = 37,
+        regSMSConfirm=38,
         Promotion = 4,//Об акции
         Promocode = 5,//Ввести код
         ProRule = 6,//Правила акции

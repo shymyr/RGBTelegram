@@ -9,14 +9,13 @@ namespace RGBTelegram.vpluse
 {
     public interface IServiceCall
     {
-        //Task<HttpResponseMessage> CallService(StringContent content, string action, string methodType);
-
         Task<ErrorData> AuthByPassword(AuthData auth);
-
+        Task<SignUp> Register(Registration registration);
+        Task<ErrorData> SignUpConfirm(string phone, string sms_password);
         Task<ErrorData> CheckPhone(string phone);
-
         Task<Family> FamilyStatuses();
         Task<Family> GetRegions();
         Task<Family> GetCities(int regionId);
+        Task<bool> CorrectIIN(string IIN);
     }
 }

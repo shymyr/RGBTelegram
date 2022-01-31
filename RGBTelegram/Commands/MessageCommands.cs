@@ -152,15 +152,52 @@ namespace RGBTelegram.Commands
                                 await _sessionService.Update(session, OperationType.regSMS);
                                 break;
                             case OperationType.regSMS:
-                                registration = await _regService.GetOrCreate(update.Message.Chat.Id);
-                                await _regService.Update(registration, update.Message.Chat.Id, iin: text);
-                                //await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Придумайте пароль, пароль должен содержать буквы(на латинице) и цифры. Минимум 6 символов", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
-                                // await _sessionService.Update(session, OperationType.regMName);
+                                var correctIIN = await _service.CorrectIIN(text);
+                                if (correctIIN)
+                                {
+                                    registration = await _regService.GetOrCreate(update.Message.Chat.Id);
+                                    await _regService.Update(registration, update.Message.Chat.Id, iin: text);
+                                    var sign = await _service.Register(registration);
+                                    if (sign.success)
+                                    {
+                                        await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "На ваш номер отправлен СМС код подтверждения. Пожалуйста, введите код", parseMode: ParseMode.Markdown);
+                                        await _sessionService.Update(session, OperationType.regSMSConfirm);
+                                    }
+                                    else
+                                    {
+                                        await _botClient.SendTextMessageAsync(update.Message.Chat.Id, sign.message+". "+sign.field,
+                                           ParseMode.Markdown, replyMarkup: mainMenu);
+                                    }
+                                }
+                                else
+                                {
+                                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Вы ввели некорректный ИИН. Введите корректный ИИН либо вернитесь на Главную страницу",
+                                        ParseMode.Markdown, replyMarkup: mainMenu);
+                                }
                                 break;
-                            //case OperationType.regMName:
-                            //    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Придумайте пароль, пароль должен содержать буквы(на латинице) и цифры. Минимум 6 символов", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
-                            //    await _sessionService.Update(session, OperationType.reggender);
-                            //    break;
+                            case OperationType.regSMSConfirm:
+                                registration = await _regService.GetOrCreate(update.Message.Chat.Id);
+                                var confirmed = await _service.SignUpConfirm(registration.phone, text);
+                                if (confirmed.success)
+                                {
+                                    var inlineKeyboard = new InlineKeyboardMarkup(new[]
+                                           {
+                                                new[]{ new InlineKeyboardButton("Об акции"){Text="Об акции", CallbackData = "Promotion"}},
+                                                new[]{ new InlineKeyboardButton("Ввести код"){Text = "Ввести код", CallbackData = "Promocode"} },
+                                                new[]{ new InlineKeyboardButton("Правила акции"){Text = "Правила акции", CallbackData = "ProRule"}},
+                                                new[]{ new InlineKeyboardButton("Мои промокоды и призы"){Text = "Мои промокоды и призы", CallbackData = "MyPromocodes"} },
+                                                new[]{ new InlineKeyboardButton("Вопросы и ответы") { Text = "Вопросы и ответы", CallbackData = "Questions" } }
+                                            });
+                                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, $"Вы успешно зарегистрировались. Выберите необходимую операцию!",
+                                        ParseMode.Markdown, replyMarkup: inlineKeyboard);
+                                    await _sessionService.Update(session, OperationType.menu, true);
+                                }
+                                else
+                                {
+                                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, confirmed.data.First().message + ". " + confirmed.data.First().field, ParseMode.Markdown, replyMarkup: mainMenu);
+                                }
+                                
+                                break;
                             //case OperationType.reggender:
                             //    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Придумайте пароль, пароль должен содержать буквы(на латинице) и цифры. Минимум 6 символов", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
                             //    await _sessionService.Update(session, OperationType.regfamily_stat);
@@ -175,5 +212,7 @@ namespace RGBTelegram.Commands
 
             //await _botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, message, ParseMode.Markdown);
         }
+
+     
     }
 }

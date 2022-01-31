@@ -56,6 +56,52 @@ namespace RGBTelegram.vpluse
             return result;
         }
 
+        public async Task<SignUp> Register(Registration registration)
+        {
+            SignUp result = new SignUp();
+            StringContent content = new StringContent(JsonConvert.SerializeObject(registration), Encoding.UTF8, "application/json");
+            var Response = await CallService(content, "v2/client/action/phone-sign-up", "POST");
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.Created:
+                    var regData = JsonConvert.DeserializeObject<RegData>(resp);
+                    result.success = true;
+                    result.RegData = regData;
+                    result.status = 201;
+                    break;
+                case System.Net.HttpStatusCode.UnprocessableEntity:
+                case System.Net.HttpStatusCode.InternalServerError:
+                    var error = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = error.data.First().message;
+                    result.field = error.data.First().field;
+                    break;
+            }
+            return result;
+        }
+
+        public async Task<ErrorData> SignUpConfirm(string phone, string sms_password)
+        {
+            ErrorData result = new ErrorData();
+            SMSConfirm sms = new SMSConfirm() { phone = phone, sms_password = sms_password };
+            StringContent content = new StringContent(JsonConvert.SerializeObject(sms), Encoding.UTF8, "application/json");
+            var Response = await CallService(content, "v2/client/action/phone-sign-up-confirm", "POST");
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.Created:
+                    result.success = true;
+                    break;
+                case System.Net.HttpStatusCode.UnprocessableEntity:
+                case System.Net.HttpStatusCode.InternalServerError:
+                    var resp = await Response.Content.ReadAsStringAsync();
+                    result = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    break;
+            }
+            return result;
+        }
+
         public async Task<ErrorData> CheckPhone(string phone)
         {
             ErrorData result = new ErrorData();
@@ -139,7 +185,7 @@ namespace RGBTelegram.vpluse
         public async Task<Family> GetCities(int regionId)
         {
             Family result = new Family();
-            var Response = await CallService(null, $"v2/client/catalog/cities/{regionId}", "GET") ;
+            var Response = await CallService(null, $"v2/client/catalog/cities/{regionId}", "GET");
             var resp = await Response.Content.ReadAsStringAsync();
             switch (Response.StatusCode)
             {
@@ -164,10 +210,44 @@ namespace RGBTelegram.vpluse
             return result;
         }
 
+        public async Task<bool> CorrectIIN(string IIN)
+        {
+            int s = 0;
+            for (int i = 0; i < 11; i++)
+            {
+                s = s + (i + 1) * int.Parse(IIN.ToCharArray()[i].ToString());
+            }
+            int k = s % 11;
+            if (k == 10)
+            {
+                s = 0;
+                for (int i = 0; i < 11; i++)
+                {
+                    int t = (i + 3) % 11;
+                    if (t == 0)
+                    {
+                        t = 11;
+                    }
+                    s = s + t * int.Parse(IIN.ToCharArray()[i].ToString());
+                }
+                k = s % 11;
+                if (k == 10)
+                    return false;
+
+                return (k == int.Parse(IIN.Substring(11, 1)));
+            }
+            return (k == int.Parse(IIN.Substring(11, 1)));
+        }
+
         public class Phone
         {
             public string phone { get; set; }
         }
 
+        public class SMSConfirm
+        {
+            public string phone { get; set; }
+            public string sms_password { get; set; }
+        }
     }
 }
