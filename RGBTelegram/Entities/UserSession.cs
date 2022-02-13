@@ -14,5 +14,6 @@ namespace RGBTelegram.Entities
         public long? UserId { get; set; }
         public DateTime dateTime { get; set; } = DateTime.UtcNow;
         public OperationType Type { get; set; }
+        public Country country { get; set; }
     }
 }
