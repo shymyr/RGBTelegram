@@ -15,5 +15,6 @@ namespace RGBTelegram.Entities
         public DateTime dateTime { get; set; } = DateTime.UtcNow;
         public OperationType Type { get; set; }
         public Country country { get; set; }
+        public Language language { get; set; } 
     }
 }

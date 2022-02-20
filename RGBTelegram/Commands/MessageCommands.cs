@@ -4,6 +4,7 @@ using RGBTelegram.vpluse;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -36,10 +37,23 @@ namespace RGBTelegram.Commands
                                             {
                                                 new[]{ new InlineKeyboardButton("Главное меню") { Text = "Главное меню", CallbackData = "Menu" } }
                                             });
+
+            StringBuilder resp = new StringBuilder();
             switch (text)
             {
                 case "/start":
-                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Добро пожаловать в Бот! Здесь вы можете Нужен текст что будет здесь", ParseMode.Markdown, replyMarkup: mainMenu);
+                    resp.AppendLine("Тіркеліңіз, қақпақ астындағы кодтарды белсендіріңіз және сыйлықтар ұтып алу мүмкіндігіне ие болыңыз!");
+                    resp.AppendLine("Регистрируйтесь, активируйте коды из под крышек и получите шанс выиграть призы!");
+                    resp.AppendLine();
+                    resp.AppendLine("Елді таңдаңыз:");
+                    resp.AppendLine("Выберите страну:");
+
+                    var country = new InlineKeyboardMarkup(new[]
+                                           {
+                                                new[]{ new InlineKeyboardButton("Қазақстан") { Text = "Қазақстан", CallbackData = "KAZ" } },
+                                                 new[]{ new InlineKeyboardButton("Кыргызстан ") { Text = "Кыргызстан ", CallbackData = "KGZ" } }
+                                            });
+                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, resp.ToString(), ParseMode.Markdown, replyMarkup: country);
                     await _sessionService.Update(session, OperationType.start);
                     break;
                 case "Авторизация":

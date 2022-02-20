@@ -25,8 +25,13 @@ namespace RGBTelegram
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<IISServerOptions>(options =>
+            {
+                options.AutomaticAuthentication = false;
+            });
             services.AddControllers();
-            services.AddDbContext<DataContext>(opt => opt.UseSqlServer(_configuration.GetConnectionString("Db")), ServiceLifetime.Singleton);
+            services.AddDbContext<DataContext>(opt =>
+               opt.UseNpgsql(_configuration.GetConnectionString("Db")), ServiceLifetime.Singleton);
             services.AddSingleton<TelegramBot>();
             services.AddSingleton<ICommandExecutor, CommandExecutor>();
             services.AddSingleton<IUserService, UserService>();
@@ -34,22 +39,19 @@ namespace RGBTelegram
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IServiceCall, ServiceCall>();
             services.AddSingleton<IRegService, RegService>();
+            services.AddSingleton<ILanguageText, LanguageText>();
             services.AddSingleton<BaseCommand, MessageCommands>();
             services.AddSingleton<BaseCommand, CallbackCommands>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-            }
-
+            serviceProvider.GetRequiredService<TelegramBot>().GetBot().Wait();
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>

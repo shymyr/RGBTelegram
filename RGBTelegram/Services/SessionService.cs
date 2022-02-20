@@ -24,9 +24,9 @@ namespace RGBTelegram.Services
             var sesion = await _context.UserSessions.FirstOrDefaultAsync(x => x.User == user);
             if (sesion != null)
             {
-                sesion.dateTime = DateTime.UtcNow;
-                _context.UserSessions.Update(sesion);
-                await _context.SaveChangesAsync();
+                //sesion.dateTime = DateTime.UtcNow;
+                //_context.UserSessions.Update(sesion);
+                //await _context.SaveChangesAsync();
                 return sesion;
             }
 
@@ -55,21 +55,19 @@ namespace RGBTelegram.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task Update(UserSession session, OperationType operation)
+        public async Task Update(UserSession session, OperationType operation, bool? authorised =null,Country? country = null, Language? language = null)
         {
             session.dateTime = DateTime.UtcNow;
             session.Type = operation;
+            if (authorised.HasValue)
+                session.Authorized = authorised.Value;
+            if (country.HasValue)
+                session.country = country.Value;
+            if (language.HasValue)
+                session.language = language.Value;
             _context.UserSessions.Update(session);
             await _context.SaveChangesAsync();
         }
-
-        public async Task Update(UserSession session, OperationType operation, bool authorised)
-        {
-            session.dateTime = DateTime.UtcNow;
-            session.Type = operation;
-            session.Authorized = authorised;
-            _context.UserSessions.Update(session);
-            await _context.SaveChangesAsync();
-        }
+       
     }
 }

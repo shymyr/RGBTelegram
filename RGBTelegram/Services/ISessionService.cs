@@ -11,7 +11,7 @@ namespace RGBTelegram.Services
     {
         Task<UserSession> GetOrCreate(Update update);
         Task Delete(UserSession session);
-        Task Update(UserSession session, OperationType operation);
-        Task Update(UserSession session,OperationType operation, bool authorised = false);
+        Task Update(UserSession session, OperationType operation, bool? authorised = null, Country? country = null, Language? language = null);
+        
     }
 }

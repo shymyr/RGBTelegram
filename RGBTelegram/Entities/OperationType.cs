@@ -8,6 +8,8 @@ namespace RGBTelegram.Entities
     public enum OperationType
     {
         start = 0,
+        country =10,
+        language=11,
         menu = 1,
         //Authorization
         auth = 2,

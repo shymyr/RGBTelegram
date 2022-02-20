@@ -43,7 +43,7 @@ namespace RGBTelegram.Services
             }
             else
             {
-                await _botClient.SendTextMessageAsync(session.UserId, "Ваша сессия закрыто. Пожалуйста, авторизуйтесь и начните заново!", parseMode: ParseMode.Markdown);
+                await _botClient.SendTextMessageAsync(update?.Message?.Chat.Id ?? update?.CallbackQuery?.Message?.Chat.Id, "Ваша сессия закрыто. Пожалуйста, авторизуйтесь и начните заново!", parseMode: ParseMode.Markdown);
                 await _sessionService.Delete(session);
 
             }
