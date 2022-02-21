@@ -34,17 +34,13 @@ namespace RGBTelegram.Commands
         {
             var text = update.CallbackQuery.Data;
             Registration registration = new Registration();
-            var mainMenu = new InlineKeyboardMarkup(new[]
-                                            {
-                                                new[]{ new InlineKeyboardButton("Главное меню") { Text = "Главное меню", CallbackData = "Menu" } }
-                                            });
+
             StringBuilder resp = new StringBuilder();
             var ChatId = update.CallbackQuery.Message.Chat.Id;
             switch (text)
             {
                 case "KAZ":
                     resp.AppendLine("Тілді таңдаңыз.");
-                    resp.AppendLine("Тилди тандаңыз.");
                     resp.AppendLine("Выберите язык.");
                     var language = new InlineKeyboardMarkup(new[]
                                           {
@@ -66,67 +62,73 @@ namespace RGBTelegram.Commands
                     await _sessionService.Update(session, OperationType.country, country: text == "KAZ" ? Country.KAZ : Country.KGZ);
                     break;
                 case "Authorization":
-                    var phone = new ReplyKeyboardMarkup(new[]
-                                          {
-                                                    new KeyboardButton("Поделиться телефоном")
-                                                     {
-                                                        RequestContact = true
-                                                     }
-                                                });
-                    await _botClient.SendTextMessageAsync(ChatId, "Отправьте свой номер телефона с помощью кнопки \"Поделиться телефоном\"", ParseMode.Markdown, replyMarkup: phone);
                     await _sessionService.Update(session, OperationType.auth);
+                    await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.regTelNumber, session.language), 
+                        ParseMode.Markdown, replyMarkup: _languageText.GetPhoneMarkup(session.language));                   
                     break;
                 case "Registration":
-                    var ph = new ReplyKeyboardMarkup(new[]
-                                          {
-                                                    new KeyboardButton("Поделиться телефоном")
-                                                     {
-                                                        RequestContact = true
-                                                     }
-                                                });
-                    await _botClient.SendTextMessageAsync(ChatId, "Для регистрации отправьте номер телефона", ParseMode.Markdown, replyMarkup: ph);
                     await _sessionService.Update(session, OperationType.regTelNumber);
+                    await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.regTelNumber, session.language),
+                        ParseMode.Markdown, replyMarkup: _languageText.GetPhoneMarkup(session.language));
+
                     break;
                 case "Menu"://Главное меню
-                    InlineKeyboardMarkup inlineKeyboard;
-                    if (session.Authorized)
+                    if (session.country == null)
                     {
-                        inlineKeyboard = new InlineKeyboardMarkup(new[]
-                                                {
-                                                new[]{ new InlineKeyboardButton("Об акции"){Text="Об акции", CallbackData = "Promotion"}},
-                                                new[]{ new InlineKeyboardButton("Ввести код"){Text = "Ввести код", CallbackData = "Promocode"} },
-                                                new[]{ new InlineKeyboardButton("Правила акции"){Text = "Правила акции", CallbackData = "ProRule"}},
-                                                new[]{ new InlineKeyboardButton("Мои промокоды и призы"){Text = "Мои промокоды и призы", CallbackData = "MyPromocodes"} },
-                                                new[]{ new InlineKeyboardButton("Вопросы и ответы") { Text = "Вопросы и ответы", CallbackData = "Questions" } }
+                        resp.AppendLine("Елді таңдаңыз:");
+                        resp.AppendLine("Выберите страну:");
+                        var country = new InlineKeyboardMarkup(new[]
+                                              {
+                                                new[]{ new InlineKeyboardButton("Қазақстан") { Text = "Қазақстан", CallbackData = "KAZ" } },
+                                                 new[]{ new InlineKeyboardButton("Кыргызстан ") { Text = "Кыргызстан ", CallbackData = "KGZ" } }
                                             });
+                        await _botClient.SendTextMessageAsync(update.Message.Chat.Id, resp.ToString(), ParseMode.Markdown, replyMarkup: country);
+                        await _sessionService.Update(session, OperationType.start);
                     }
                     else
-                        inlineKeyboard = new InlineKeyboardMarkup(new[]
-                                           {
-                                                new[]{ new InlineKeyboardButton("Об акции"){Text="Об акции", CallbackData = "Promotion"}},
-                                                new[]{ new InlineKeyboardButton("Авторизация") {Text= "Авторизация", CallbackData = "Authorization"}},
-                                                new[]{ new InlineKeyboardButton("Регистрация") {Text= "Регистрация", CallbackData = "Registration"}}
-                                            });
-                    await _botClient.SendTextMessageAsync(ChatId, "Выберите необходимую операцию из нижеперечисленных кнопок:", ParseMode.Markdown, replyMarkup: inlineKeyboard);
-                    await _sessionService.Update(session, OperationType.menu);
+                    {
+                        await _sessionService.Update(session, OperationType.menu);
+                        await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.country, session.language),
+                       ParseMode.Markdown, replyMarkup: _languageText.GetKeyboard(session));
+                    }
                     break;
                 case "Promotion"://"Об акции"
-                    await _botClient.SendTextMessageAsync(ChatId, "Ждём текст или событию об Акции!", ParseMode.Markdown, replyMarkup: mainMenu);
-                    await _sessionService.Update(session, OperationType.Promotion);
+                    if (session.country == null || session.language == null)
+                    {
+                        resp.AppendLine("Әрі қарай қызмет алу үшін ел мен тілді таңдаңыз");
+                        resp.AppendLine("Для дальнешего действия, выберите страну и язык");
+                        resp.AppendLine("Андан аркы аракет үчүн өлкөңүздү жана тилиңизди тандаңыз");
+                        var country = new InlineKeyboardMarkup(new[]
+                                               {
+                                                new[]{ new InlineKeyboardButton("Қазақстан") { Text = "Қазақстан", CallbackData = "KAZ" } },
+                                                 new[]{ new InlineKeyboardButton("Кыргызстан ") { Text = "Кыргызстан ", CallbackData = "KGZ" } }
+                                            });
+                        await _botClient.SendTextMessageAsync(update.Message.Chat.Id, resp.ToString(), ParseMode.Markdown, replyMarkup: country);
+                        await _sessionService.Update(session, OperationType.start);
+                    }
+                    else
+                    {
+                        if (session.language != null)
+                        {
+                            var about = await _service.About(((int)session.country), session.language);
+                            await _botClient.SendTextMessageAsync(ChatId, about.Items.FirstOrDefault().name, ParseMode.Markdown, replyMarkup: _languageText.GetMainMenu(session.language, session.Authorized));
+                            await _sessionService.Update(session, OperationType.Promotion);
+                        }
+                    }
                     break;
                 case "Promocode"://Ввести код
 
                     break;
                 case "ProRule": //"Правила акции"
-                    await _botClient.SendTextMessageAsync(ChatId, "Ждём текст или событию про Правила акции!", ParseMode.Markdown, replyMarkup: mainMenu);
+                    await _botClient.SendTextMessageAsync(ChatId, "Ждём текст или событию про Правила акции!", ParseMode.Markdown, replyMarkup: _languageText.GetMainMenu(session.language, session.Authorized));
                     await _sessionService.Update(session, OperationType.ProRule);
                     break;
                 case "MyPromocodes"://"Мои промокоды и призы"
-                    await _botClient.SendTextMessageAsync(ChatId, "Ждём текст или событию про Мои промокоды и призы!", ParseMode.Markdown, replyMarkup: mainMenu);
+                    await _botClient.SendTextMessageAsync(ChatId, "Ждём текст или событию про Мои промокоды и призы!", ParseMode.Markdown, replyMarkup: _languageText.GetMainMenu(session.language, session.Authorized));
                     await _sessionService.Update(session, OperationType.MyPromocodes);
                     break;
                 case "Questions"://"Вопросы и ответы"
-                    await _botClient.SendTextMessageAsync(ChatId, "Ждём текст или событию про Вопросы и ответы!", ParseMode.Markdown, replyMarkup: mainMenu);
+                    await _botClient.SendTextMessageAsync(ChatId, "Ждём текст или событию про Вопросы и ответы!", ParseMode.Markdown, replyMarkup: _languageText.GetMainMenu(session.language, session.Authorized));
                     await _sessionService.Update(session, OperationType.Questions);
                     break;
                 case "fam1":
@@ -157,8 +159,7 @@ namespace RGBTelegram.Commands
                             var lan = text == "kazLanguage" ? Language.KAZ : (text == "kgzLanguage" ? Language.KGZ : Language.Rus);
                             await _sessionService.Update(session, OperationType.language, language: lan);
                             resp.AppendLine(await _languageText.GetTextFromLanguage(OperationType.country, lan));
-                            inlineKeyboard = _languageText.GetKeyboard(session);
-                            await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), replyMarkup: inlineKeyboard);
+                            await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), replyMarkup: _languageText.GetKeyboard(session));
                             break;
                         case OperationType.regcity:
                             registration = await _regService.GetOrCreate(ChatId);

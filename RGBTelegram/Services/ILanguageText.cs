@@ -11,5 +11,7 @@ namespace RGBTelegram.Services
     {
         Task<string> GetTextFromLanguage(OperationType operation, Language language);
         InlineKeyboardMarkup GetKeyboard(UserSession session);
+        InlineKeyboardMarkup GetMainMenu(Language language, bool Authorized);
+        ReplyKeyboardMarkup GetPhoneMarkup(Language language);
     }
 }

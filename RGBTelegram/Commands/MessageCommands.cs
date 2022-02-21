@@ -20,13 +20,15 @@ namespace RGBTelegram.Commands
         private readonly IAuthService _authService;
         private readonly IServiceCall _service;
         private readonly IRegService _regService;
-        public MessageCommands(ISessionService sessionService, IAuthService authService, IServiceCall service, IRegService regService, TelegramBot telegramBot)
+        private readonly ILanguageText _languageText;
+        public MessageCommands(ISessionService sessionService, IAuthService authService, IServiceCall service, IRegService regService, TelegramBot telegramBot, ILanguageText languageText)
         {
             _sessionService = sessionService;
             _authService = authService;
             _service = service;
             _regService = regService;
             _botClient = telegramBot.GetBot().Result;
+            _languageText = languageText;
         }
         public override string Name => "message";
         public override async Task ExecuteAsync(Update update, UserSession session)
@@ -85,7 +87,7 @@ namespace RGBTelegram.Commands
                         if (session.Type == OperationType.auth)
                         {
                             await _authService.GetOrCreate(update.Message.Chat.Id, update.Message.Contact.PhoneNumber.Replace("+", ""));
-                            await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Укажите пароль:", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                            await _botClient.SendTextMessageAsync(update.Message.Chat.Id, await _languageText.GetTextFromLanguage(OperationType.auth,session.language), ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
                             await _sessionService.Update(session, OperationType.telNumber);
                         }
                         else
@@ -126,17 +128,10 @@ namespace RGBTelegram.Commands
                                 var call = await _service.AuthByPassword(data);
                                 if (call.success)
                                 {
-                                    var inlineKeyboard = new InlineKeyboardMarkup(new[]
-                                            {
-                                                new[]{ new InlineKeyboardButton("Об акции"){Text="Об акции", CallbackData = "Promotion"}},
-                                                new[]{ new InlineKeyboardButton("Ввести код"){Text = "Ввести код", CallbackData = "Promocode"} },
-                                                new[]{ new InlineKeyboardButton("Правила акции"){Text = "Правила акции", CallbackData = "ProRule"}},
-                                                new[]{ new InlineKeyboardButton("Мои промокоды и призы"){Text = "Мои промокоды и призы", CallbackData = "MyPromocodes"} },
-                                                new[]{ new InlineKeyboardButton("Вопросы и ответы") { Text = "Вопросы и ответы", CallbackData = "Questions" } }
-                                            });
-
-                                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, "Выберите необходимую операцию из нижеперечисленных кнопок:", ParseMode.Markdown, replyMarkup: inlineKeyboard);
                                     await _sessionService.Update(session, OperationType.menu, authorised: true);
+                                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, await _languageText.GetTextFromLanguage(OperationType.menu,session.language),
+                                        ParseMode.Markdown, replyMarkup: _languageText.GetMainMenu(session.language,true));
+                                    
                                 }
                                 else
                                 {

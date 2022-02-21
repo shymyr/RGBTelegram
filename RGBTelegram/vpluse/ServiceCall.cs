@@ -154,6 +154,60 @@ namespace RGBTelegram.vpluse
             return result;
         }
 
+        /// <summary>
+        /// Получить описание акции
+        /// </summary>
+        /// <param name="countryId">Код страны 1 - Казахстан, 2 - Киргиз</param>
+        /// <returns></returns>
+        public async Task<Family> About(int countryId, Language language)
+        {
+            Family result = new Family();
+            var Response = await CallService(null, $"v2/nauryzpromo/about/{countryId}", "GET");
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+
+                    JObject details = JObject.Parse(resp);
+                    result.Items = new List<Item>();
+                    foreach (var item in details["data"].ToArray())
+                    {
+                        Item item1 = new Item();
+                        item1.id = int.Parse(item["id"].ToString());
+
+                        switch (item1.id)
+                        {
+                            case 1:
+                            case 2:
+                                item1.name = item["description"]["ru"].ToString();
+                                break;
+                            case 3:
+                                item1.name = item["description"]["kz"].ToString();
+                                break;
+                            case 4:
+                                item1.name = item["description"]["kg"].ToString();
+                                break;
+                        }
+                        if (language == Language.KAZ && item1.id == 3)
+                            result.Items.Add(item1);
+                        if (language == Language.Rus && (item1.id == 1||item1.id==2))
+                            result.Items.Add(item1);
+                        if (language == Language.KGZ && item1.id == 4)
+                            result.Items.Add(item1);
+                    }
+                    result.status = 200;
+                    result.success = true;
+                    break;
+                case System.Net.HttpStatusCode.UnprocessableEntity:
+                case System.Net.HttpStatusCode.InternalServerError:
+                    var err = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = err.data.First().message;
+                    break;
+            }
+            return result;
+        }
         public async Task<Family> GetRegions()
         {
             Family result = new Family();
