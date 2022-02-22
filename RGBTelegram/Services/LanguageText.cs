@@ -244,5 +244,67 @@ namespace RGBTelegram.Services
                                                      }
                                                 });
         }
+
+        public string GetCallCenter(Country country, Language language)
+        {
+            string result = "";
+            switch (country)
+            {
+                case Country.KAZ:
+                    switch (language)
+                    {
+                        case Language.KAZ:
+                            result = "Қосымша сұрақтар бойынша 3775 қысқа нөміріне хабарласыңыз";
+                            break;
+                        case Language.Rus:
+                            result = "По всем дополнительным вопросам обратитесь по короткому номеру 3775";
+                            break;
+                    }
+                    break;
+                case Country.KGZ:
+                    switch (language)
+                    {
+                        case Language.KGZ:
+                            result = "Бардык кошумча суроолор боюнча 3775 кыска номерине кайрылыңыз";
+                            break;
+                        case Language.Rus:
+                            result = "По всем дополнительным вопросам обратитесь по короткому номеру 3775";
+                            break;
+                    }
+                    break;
+            }
+            return result;
+        }
+
+        public string GetWinnerList(Country country, Language language)
+        {
+            string result = "";
+            switch (country)
+            {
+                case Country.KAZ:
+                    switch (language)
+                    {
+                        case Language.KAZ:
+                            result = "Жеңімпаздардың толық тізімімен Nauryzpromo.kz сайтында таныса аласыз";
+                            break;
+                        case Language.Rus:
+                            result = "С полным списком победителей можете ознакомится на сайте Nauryzpromo.kz";
+                            break;
+                    }
+                    break;
+                case Country.KGZ:
+                    switch (language)
+                    {
+                        case Language.KGZ:
+                            result = "Жеңүүчүлөрдүн толук тизмеги менен Nauryzpromo.kz сайтында таанышууга болот";
+                            break;
+                        case Language.Rus:
+                            result = "С полным списком победителей можете ознакомится на сайте Nauryzpromo.kz";
+                            break;
+                    }
+                    break;
+            }
+            return result;
+        }
     }
 }

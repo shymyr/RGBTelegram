@@ -13,5 +13,7 @@ namespace RGBTelegram.Services
         InlineKeyboardMarkup GetKeyboard(UserSession session);
         InlineKeyboardMarkup GetMainMenu(Language language, bool Authorized);
         ReplyKeyboardMarkup GetPhoneMarkup(Language language);
+        string GetCallCenter(Country country, Language language);
+        string GetWinnerList(Country country, Language language);
     }
 }

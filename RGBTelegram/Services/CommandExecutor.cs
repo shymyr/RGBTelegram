@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RGBTelegram.Services
 {
@@ -43,7 +44,12 @@ namespace RGBTelegram.Services
             }
             else
             {
-                await _botClient.SendTextMessageAsync(update?.Message?.Chat.Id ?? update?.CallbackQuery?.Message?.Chat.Id, "Ваша сессия закрыто. Пожалуйста, авторизуйтесь и начните заново!", parseMode: ParseMode.Markdown);
+                InlineKeyboardMarkup mainMenu = new InlineKeyboardMarkup(new[]
+                                         {
+                                                new[]{ new InlineKeyboardButton("Меню") { Text = "Меню", CallbackData = "mainmenu" } }
+                                            });
+                await _botClient.SendTextMessageAsync(update?.Message?.Chat.Id ?? update?.CallbackQuery?.Message?.Chat.Id, "Ваша сессия закрыто. Пожалуйста, авторизуйтесь и начните заново!",
+                    parseMode: ParseMode.Markdown, replyMarkup: mainMenu);
                 await _sessionService.Delete(session);
 
             }

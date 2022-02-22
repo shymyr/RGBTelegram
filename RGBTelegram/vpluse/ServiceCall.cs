@@ -40,7 +40,7 @@ namespace RGBTelegram.vpluse
         public async Task<ErrorData> AuthByPassword(AuthData auth)
         {
             ErrorData result = new ErrorData();
-            StringContent content = new StringContent(JsonConvert.SerializeObject(auth), Encoding.UTF8, "application/json");
+                       StringContent content = new StringContent(JsonConvert.SerializeObject(auth), Encoding.UTF8, "application/json");
             var Response = await CallService(content, "v2/client/action/auth-by-password", "POST");
             switch (Response.StatusCode)
             {
@@ -153,6 +153,54 @@ namespace RGBTelegram.vpluse
             }
             return result;
         }
+        public async Task<Family> Terms(int countryId, Language language)
+        {
+            Family result = new Family();
+            var Response = await CallService(null, $"v2/nauryzpromo/terms/{countryId}", "GET");
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+
+                    JObject details = JObject.Parse(resp);
+                    result.Items = new List<Item>();
+                    foreach (var item in details["data"].ToArray())
+                    {
+                        Item term = new Item();
+                        term.id = 1;
+                        Item file = new Item();
+                        file.id = 2;
+                        switch (language)
+                        {
+                            case Language.KAZ:
+                                term.name = item["term"]["kz"].ToString();
+                                file.name = item["file"]["kz"].ToString();
+                                break;
+                            case Language.KGZ:
+                                term.name = item["term"]["kg"].ToString();
+                                file.name = item["file"]["kg"].ToString();
+                                break;
+                            case Language.Rus:
+                                term.name = item["term"]["ru"].ToString();
+                                file.name = item["file"]["ru"].ToString();
+                                break;
+                        }
+                        result.Items.Add(term);
+                        result.Items.Add(file);
+                    }
+                    result.status = 200;
+                    result.success = true;
+                    break;
+                case System.Net.HttpStatusCode.UnprocessableEntity:
+                case System.Net.HttpStatusCode.InternalServerError:
+                    var err = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = err.data.First().message;
+                    break;
+            }
+            return result;
+        }
 
         /// <summary>
         /// Получить описание акции
@@ -173,27 +221,20 @@ namespace RGBTelegram.vpluse
                     foreach (var item in details["data"].ToArray())
                     {
                         Item item1 = new Item();
-                        item1.id = int.Parse(item["id"].ToString());
-
-                        switch (item1.id)
+                        item1.id = int.Parse(item["id"].ToString());                        
+                        switch (language)
                         {
-                            case 1:
-                            case 2:
-                                item1.name = item["description"]["ru"].ToString();
-                                break;
-                            case 3:
+                            case Language.KAZ:
                                 item1.name = item["description"]["kz"].ToString();
                                 break;
-                            case 4:
+                            case Language.KGZ:
                                 item1.name = item["description"]["kg"].ToString();
                                 break;
+                            case Language.Rus:
+                                item1.name = item["description"]["ru"].ToString();
+                                break;
                         }
-                        if (language == Language.KAZ && item1.id == 3)
-                            result.Items.Add(item1);
-                        if (language == Language.Rus && (item1.id == 1||item1.id==2))
-                            result.Items.Add(item1);
-                        if (language == Language.KGZ && item1.id == 4)
-                            result.Items.Add(item1);
+                        result.Items.Add(item1);
                     }
                     result.status = 200;
                     result.success = true;
@@ -297,7 +338,11 @@ namespace RGBTelegram.vpluse
         {
             public string phone { get; set; }
         }
-
+        public class Auth
+        {
+            public string phone { get; set; }
+            public string password { get; set; }
+        }
         public class SMSConfirm
         {
             public string phone { get; set; }
