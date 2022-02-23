@@ -22,7 +22,16 @@ namespace RGBTelegram.Services
         {
             var Auth = await _context.AuthDatas.FirstOrDefaultAsync(x => x.ChatId == ChatId);
 
-            if (Auth != null) return Auth;
+            if (Auth != null)
+            {
+                if (!string.IsNullOrEmpty(phone))
+                {
+                    Auth.phone = phone;
+                    _context.AuthDatas.Update(Auth);
+                    await _context.SaveChangesAsync();
+                }
+                return Auth;
+            }
 
             var result = await _context.AuthDatas.AddAsync(new AuthData() { ChatId = ChatId, phone = phone});
             await _context.SaveChangesAsync();

@@ -28,7 +28,7 @@ namespace RGBTelegram.Services
         }
 
         public async Task<Registration> Update(Registration registration,long ChatId, string phone = null, string password = null, string first_name = null,
-            string last_name = null, string middlename = null, string gender = null, string family_stat = null, string birth_day = null,
+            string last_name = null, string middlename = null, string gender = null, string family_stat = null, string birth_day = null, 
             string email = null, int? city_id=null, int? region_id=null, string iin = null)
         {
             if (!string.IsNullOrEmpty(phone))
@@ -45,8 +45,11 @@ namespace RGBTelegram.Services
                 registration.gender = gender;
             if (!string.IsNullOrEmpty(family_stat))
                 registration.family_stat = family_stat;
+
             if (!string.IsNullOrEmpty(birth_day))
-                registration.birth_day = birth_day;
+            {
+                registration.birth_day = DateTime.Parse(birth_day).ToString("yyyy’-‘MM’-‘dd’T’HH’:’mm’:’ss");
+            }
             if (!string.IsNullOrEmpty(email))
                 registration.email = email;
             if (!string.IsNullOrEmpty(phone))

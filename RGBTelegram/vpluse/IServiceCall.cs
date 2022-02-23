@@ -16,7 +16,7 @@ namespace RGBTelegram.vpluse
         Task<Family> FamilyStatuses();
         Task<Family> Terms(int countryId, Language language);
         Task<Family> About(int countryId, Language language);
-        Task<Family> GetRegions();
+        Task<Family> GetRegions(int countryId);
         Task<Family> GetCities(int regionId);
         Task<bool> CorrectIIN(string IIN);
     }

@@ -15,6 +15,109 @@ namespace RGBTelegram.Services
             StringBuilder result = new StringBuilder();
             switch (operation)
             {
+                case OperationType.regSMSConfirm:
+                    switch (language)
+                    {
+                        case Language.KAZ:
+                            result.AppendLine(@"Сіз сәтті тіркелдіңіз. Қажетті операцияны таңдаңыз!");
+                            break;
+                        case Language.Rus:
+                            result.AppendLine(@"Вы успешно зарегистрировались. Выберите необходимую операцию!");
+                            break;
+                        case Language.KGZ:
+                            result.AppendLine("Сиз ийгиликтүү катталдыңыз. Керектүү операцияны тандаңыз!");
+                            break;
+                    }
+                    break;
+                case OperationType.gender:
+                    switch (language)
+                    {
+                        case Language.Rus:
+                            result.AppendLine(@"Статус пола:");
+                            break;
+                        case Language.KGZ:
+                            result.AppendLine("Гендердик статус:");
+                            break;
+                    }
+                    break;
+                case OperationType.birth_day:
+                    switch (language)
+                    {
+                        case Language.Rus:
+                            result.AppendLine(@"Укажите день рождения в формате ДД.ММ.ГГГГ (пример 25.01.1991):");
+                            break;
+                        case Language.KGZ:
+                            result.AppendLine("Туулган күнүңүздү ДД.ММ.ГГГГ форматында киргизиңиз (мисалы 25.01.1991):");
+                            break;
+                    }
+                    break;
+                case OperationType.last_name:
+                    switch (language)
+                    {
+                        case Language.Rus:
+                            result.AppendLine(@"Отчество(при наличии, если отсутствует пропустите):");
+                            break;
+                        case Language.KGZ:
+                            result.AppendLine("Атасынын аты(бар болсо, жок болсо, өткөрүп жибериңиз):");
+                            break;
+                    }
+                    break;
+                case OperationType.regSMS:
+                    switch (language)
+                    {
+                        case Language.KAZ:
+                            result.AppendLine(@"Сіздің нөміріңізге SMS растау коды жіберілді. Кодты енгізіңіз:");
+                            break;
+                        case Language.Rus:
+                            result.AppendLine(@"На ваш номер отправлен СМС код подтверждения. Пожалуйста, введите код:");
+                            break;
+                        case Language.KGZ:
+                            result.AppendLine("Сиздин номериңизге тастыктоо коду SMS жөнөтүлдү. Сураныч, кодду киргизиңиз:");
+                            break;
+                    }
+                    break;
+                case OperationType.regcity:
+                    switch (language)
+                    {
+                        case Language.KAZ:
+                            result.AppendLine(@"Қаланы таңдаңыз:");
+                            break;
+                        case Language.Rus:
+                            result.AppendLine(@"Выберите город:");
+                            break;
+                        case Language.KGZ:
+                            result.AppendLine("Шаар тандоо:");
+                            break;
+                    }
+                    break;
+                case OperationType.regregion:
+                    switch (language)
+                    {
+                        case Language.KAZ:
+                            result.AppendLine(@"Аймақты таңдаңыз:");
+                            break;
+                        case Language.Rus:
+                            result.AppendLine(@"Выберите регион:");
+                            break;
+                        case Language.KGZ:
+                            result.AppendLine("Аймакты тандоо:");
+                            break;
+                    }
+                    break;
+                case OperationType.regPass:
+                    switch (language)
+                    {
+                        case Language.KAZ:
+                            result.AppendLine(@"Құпия сөз енгізіңіз, құпия сөзде әріптер (латын тілінде) және сандар болуы керек. Кемінде 6 таңба");
+                            break;
+                        case Language.Rus:
+                            result.AppendLine(@"Придумайте пароль, пароль должен содержать буквы(на латинице) и цифры. Минимум 6 символов");
+                            break;
+                        case Language.KGZ:
+                            result.AppendLine("Сырсөз түзүңүз, сырсөз тамгаларды (латынча) жана сандарды камтышы керек. Минималдуу 6 белги.");
+                            break;
+                    }
+                    break;
                 case OperationType.menu:
                     switch (language)
                     {
@@ -54,6 +157,20 @@ namespace RGBTelegram.Services
                             break;
                         case Language.KGZ:
                             result.AppendLine("Салам! Алгач, өздүгүңүздү ырастаңыз.");
+                            break;
+                    }
+                    break;
+                case OperationType.regTelNumber1:
+                    switch (language)
+                    {
+                        case Language.KAZ:
+                            result.AppendLine(@"Нөмір тіркелген. Жүйеге кіріңіз.");
+                            break;
+                        case Language.Rus:
+                            result.AppendLine(@"Номер зарегистрирован. Пройдите авторизацию, пожалуйста.");
+                            break;
+                        case Language.KGZ:
+                            result.AppendLine("Номер катталган. Сураныч, кириңиз.");
                             break;
                     }
                     break;

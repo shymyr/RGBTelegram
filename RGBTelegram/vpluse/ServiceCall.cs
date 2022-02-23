@@ -249,10 +249,10 @@ namespace RGBTelegram.vpluse
             }
             return result;
         }
-        public async Task<Family> GetRegions()
+        public async Task<Family> GetRegions(int countryId)
         {
             Family result = new Family();
-            var Response = await CallService(null, "v2/client/catalog/regions/1", "GET");
+            var Response = await CallService(null, $"v2/client/catalog/regions/{countryId}", "GET");
             var resp = await Response.Content.ReadAsStringAsync();
             switch (Response.StatusCode)
             {

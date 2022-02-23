@@ -99,6 +99,12 @@ namespace RGBTelegram.Commands
                        ParseMode.Markdown, replyMarkup: _languageText.GetKeyboard(session));
                     }
                     break;
+                case "Skip":
+                    registration = await _regService.GetOrCreate(ChatId);
+                    await _regService.Update(registration, ChatId, middlename: text);
+                    await _sessionService.Update(session, OperationType.birth_day);
+                    await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.birth_day, session.language), ParseMode.Markdown);
+                    break;
                 case "mainmenu":
                     if (session.country == 0 || session.language == 0)
                     {
@@ -190,7 +196,7 @@ namespace RGBTelegram.Commands
                     var ss = text.ToCharArray().Last();
                     registration = await _regService.GetOrCreate(ChatId);
                     await _regService.Update(registration, ChatId, family_stat: ss.ToString());
-                    var regions = await _service.GetRegions();
+                    var regions = await _service.GetRegions(((int)session.country));
                     if (regions.status == 200)
                     {
                         List<List<InlineKeyboardButton>> Buttons = new List<List<InlineKeyboardButton>>();
@@ -207,13 +213,20 @@ namespace RGBTelegram.Commands
                 default:
                     switch (session.Type)
                     {
+                        case OperationType.gender:
+                            registration = await _regService.GetOrCreate(ChatId);
+                            await _regService.Update(registration, ChatId, gender: text);
+                            await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.regSMS, session.language), parseMode: ParseMode.Markdown);
+                            await _sessionService.Update(session, OperationType.regSMSConfirm);
+                            break;
                         case OperationType.country:
                             var lan = text == "kazLanguage" ? Language.KAZ : (text == "kgzLanguage" ? Language.KGZ : Language.Rus);
                             await _sessionService.Update(session, OperationType.language, language: lan);
                             resp.AppendLine(await _languageText.GetTextFromLanguage(OperationType.country, lan));
                             await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), replyMarkup: _languageText.GetKeyboard(session));
                             break;
-                        case OperationType.regcity:
+
+                        case OperationType.regregion:
                             registration = await _regService.GetOrCreate(ChatId);
                             await _regService.Update(registration, ChatId, region_id: int.Parse(text));
                             var cities = await _service.GetCities(registration.region_id);
@@ -225,15 +238,23 @@ namespace RGBTelegram.Commands
                                     Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton(rr.name) { Text = rr.name, CallbackData = rr.id.ToString() } });
                                 });
                                 var city = new InlineKeyboardMarkup(Buttons);
-                                await _botClient.SendTextMessageAsync(ChatId, "Выберите город:", replyMarkup: city);
-                                await _sessionService.Update(session, OperationType.regIIN);
+                                await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.regcity, session.language), replyMarkup: city);
+                                await _sessionService.Update(session, OperationType.regcity);
                             }
                             break;
-                        case OperationType.regIIN:
+                        case OperationType.regcity:
                             registration = await _regService.GetOrCreate(ChatId);
                             await _regService.Update(registration, ChatId, city_id: int.Parse(text));
-                            await _botClient.SendTextMessageAsync(ChatId, "Укажите ИИН:", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
-                            await _sessionService.Update(session, OperationType.regSMS);
+                            if (session.country == Country.KAZ)
+                            {
+                                await _botClient.SendTextMessageAsync(ChatId, session.language == Language.Rus ? "Укажите ИИН:" : "ЖСН енгізіңіз:", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                                await _sessionService.Update(session, OperationType.regIIN);
+                            }
+                            else
+                            {
+                                await _botClient.SendTextMessageAsync(ChatId, "Фамилия:", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                                await _sessionService.Update(session, OperationType.first_name);
+                            }
                             break;
                     }
                     break;
