@@ -10,8 +10,8 @@ using RGBTelegram;
 namespace RGBTelegram.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220220154659_postgre")]
-    partial class postgre
+    [Migration("20220224074945_token")]
+    partial class token
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -138,6 +138,9 @@ namespace RGBTelegram.Migrations
 
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("text");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");

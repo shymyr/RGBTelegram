@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace RGBTelegram.Migrations
 {
-    public partial class postgre : Migration
+    public partial class nauryz : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

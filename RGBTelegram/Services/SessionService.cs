@@ -55,10 +55,12 @@ namespace RGBTelegram.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task Update(UserSession session, OperationType operation, bool? authorised =null,Country? country = null, Language? language = null)
+        public async Task Update(UserSession session, OperationType operation,string token=null, bool? authorised =null,Country? country = null, Language? language = null)
         {
             session.dateTime = DateTime.UtcNow;
             session.Type = operation;
+            if (!string.IsNullOrEmpty(token))
+                session.Token = token;
             if (authorised.HasValue)
                 session.Authorized = authorised.Value;
             if (country.HasValue)

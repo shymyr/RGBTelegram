@@ -127,6 +127,63 @@ namespace RGBTelegram.Commands
 
                     }
                     break;
+                case "History"://История промокодов
+                    if (session.country == 0 || session.language == 0)
+                    {
+                        resp.AppendLine("Әрі қарай қызмет алу үшін ел мен тілді таңдаңыз");
+                        resp.AppendLine("Для дальнешего действия, выберите страну и язык");
+                        resp.AppendLine("Андан аркы аракет үчүн өлкөңүздү жана тилиңизди тандаңыз");
+                        var country = new InlineKeyboardMarkup(new[]
+                                               {
+                                                new[]{ new InlineKeyboardButton("Қазақстан") { Text = "Қазақстан", CallbackData = "KAZ" } },
+                                                 new[]{ new InlineKeyboardButton("Кыргызстан ") { Text = "Кыргызстан ", CallbackData = "KGZ" } }
+                                            });
+                        await _botClient.SendTextMessageAsync(update.Message.Chat.Id, resp.ToString(), ParseMode.Markdown, replyMarkup: country);
+                        await _sessionService.Update(session, OperationType.start);
+                    }
+                    else
+                    {
+                        var history = await _service.GetBundles(session.Token);
+                        switch (history.status)
+                        {
+                            case 200:
+                                resp.AppendLine(session.language == Language.KAZ ? "Сыйлықтар:" : (session.language == Language.Rus ? "Подарки:" : "Белектер:"));
+
+                                history.gifts.ForEach(gift =>
+                                {
+                                    resp.AppendLine("   - " + (session.language == Language.KAZ ? gift.namekz : (session.language == Language.Rus ? gift.nameru : gift.namekg)));
+                                });
+                                resp.AppendLine("Промокод:");
+                                history.attempts.ForEach(att =>
+                                {
+                                    resp.AppendLine("   - " + att.promocode);
+                                });
+
+                                await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), ParseMode.Markdown, replyMarkup: mainMenu);
+                                
+                                break;
+                            case 401:
+                                switch (session.language)
+                                {
+                                    case Language.Rus:
+                                        resp.AppendLine("Промокодтардың тарихын алу үшін жүйеге кіру керек.");
+                                        break;
+                                    case Language.KGZ:
+                                        resp.AppendLine("Промокоддордун тарыхын алуу үчүн сиз кирүү керек.");
+                                        break;
+                                    case Language.KAZ:
+                                        resp.AppendLine("Для получения историю промокодов, необходимо пройти авторизоваться.");
+                                        break;
+                                }
+                                await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), ParseMode.Markdown, replyMarkup: mainMenu);
+                                break;
+                            default:
+
+                                break;
+                        }
+                       
+                    }
+                    break;
                 case "Promotion"://"Об акции"
                     if (session.country == 0 || session.language == 0)
                     {
@@ -149,7 +206,8 @@ namespace RGBTelegram.Commands
                     }
                     break;
                 case "Promocode"://Ввести код
-
+                    await _botClient.SendTextMessageAsync(ChatId, "Промокод:", ParseMode.Markdown, replyMarkup: mainMenu);
+                    await _sessionService.Update(session, OperationType.Promocode);
                     break;
                 case "ProRule": //"Правила акции"
                     if (session.country == 0 || session.language == 0)
@@ -189,35 +247,24 @@ namespace RGBTelegram.Commands
                     await _botClient.SendTextMessageAsync(ChatId, _languageText.GetWinnerList(session.country, session.language), ParseMode.Markdown, replyMarkup: mainMenu);
                     await _sessionService.Update(session, OperationType.menu);
                     break;
-                case "fam1":
-                case "fam2":
-                case "fam3":
-                case "fam4":
-                    var ss = text.ToCharArray().Last();
-                    registration = await _regService.GetOrCreate(ChatId);
-                    await _regService.Update(registration, ChatId, family_stat: ss.ToString());
-                    var regions = await _service.GetRegions(((int)session.country));
-                    if (regions.status == 200)
-                    {
-                        List<List<InlineKeyboardButton>> Buttons = new List<List<InlineKeyboardButton>>();
-                        regions.Items.ForEach(rr =>
-                        {
-                            Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton(rr.name) { Text = rr.name, CallbackData = rr.id.ToString() } });
-                        });
-                        var regs = new InlineKeyboardMarkup(Buttons);
-
-                        await _botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, "Выберите регион:", replyMarkup: regs);
-                        await _sessionService.Update(session, OperationType.regcity);
-                    }
-                    break;
                 default:
                     switch (session.Type)
                     {
                         case OperationType.gender:
                             registration = await _regService.GetOrCreate(ChatId);
                             await _regService.Update(registration, ChatId, gender: text);
-                            await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.regSMS, session.language), parseMode: ParseMode.Markdown);
-                            await _sessionService.Update(session, OperationType.regSMSConfirm);
+
+                            var sign = await _service.Register(registration);
+                            if (sign.success)
+                            {
+                                await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.regSMS, session.language), parseMode: ParseMode.Markdown);
+                                await _sessionService.Update(session, OperationType.regSMSConfirm);
+                            }
+                            else
+                            {
+                                await _botClient.SendTextMessageAsync(ChatId, sign.message + ". " + sign.field,
+                                   ParseMode.Markdown, replyMarkup: mainMenu);
+                            }
                             break;
                         case OperationType.country:
                             var lan = text == "kazLanguage" ? Language.KAZ : (text == "kgzLanguage" ? Language.KGZ : Language.Rus);

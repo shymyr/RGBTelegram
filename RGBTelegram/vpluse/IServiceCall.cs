@@ -10,6 +10,8 @@ namespace RGBTelegram.vpluse
     public interface IServiceCall
     {
         Task<ErrorData> AuthByPassword(AuthData auth);
+        Task<Bundles> GetBundles(string token);
+        Task<ErrorData> PromocodeActivation(PromoCode promo, string token);
         Task<SignUp> Register(Registration registration);
         Task<ErrorData> SignUpConfirm(string phone, string sms_password);
         Task<ErrorData> CheckPhone(string phone);

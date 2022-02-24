@@ -16,5 +16,6 @@ namespace RGBTelegram.Entities
         public OperationType Type { get; set; }
         public Country country { get; set; }
         public Language language { get; set; } 
+        public string Token { get; set; }
     }
 }

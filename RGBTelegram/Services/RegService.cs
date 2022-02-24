@@ -27,9 +27,9 @@ namespace RGBTelegram.Services
             return result.Entity;
         }
 
-        public async Task<Registration> Update(Registration registration,long ChatId, string phone = null, string password = null, string first_name = null,
-            string last_name = null, string middlename = null, string gender = null, string family_stat = null, string birth_day = null, 
-            string email = null, int? city_id=null, int? region_id=null, string iin = null)
+        public async Task<Registration> Update(Registration registration, long ChatId, string phone = null, string password = null, string first_name = null,
+            string last_name = null, string middlename = null, string gender = null, string family_stat = null, string birth_day = null,
+            string email = null, int? city_id = null, int? region_id = null, string iin = null)
         {
             if (!string.IsNullOrEmpty(phone))
                 registration.phone = phone;
@@ -48,7 +48,7 @@ namespace RGBTelegram.Services
 
             if (!string.IsNullOrEmpty(birth_day))
             {
-                registration.birth_day = DateTime.Parse(birth_day).ToString("yyyy’-‘MM’-‘dd’T’HH’:’mm’:’ss");
+                registration.birth_day = DateTime.Parse(birth_day).ToUniversalTime().ToString("s");
             }
             if (!string.IsNullOrEmpty(email))
                 registration.email = email;

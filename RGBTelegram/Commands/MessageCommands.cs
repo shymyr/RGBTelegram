@@ -143,6 +143,33 @@ namespace RGBTelegram.Commands
                     {
                         switch (session.Type)
                         {
+                            case OperationType.Promocode:
+                                if (session.country == 0 || session.language == 0)
+                                {
+                                    resp.AppendLine("Әрі қарай қызмет алу үшін ел мен тілді таңдаңыз");
+                                    resp.AppendLine("Для дальнешего действия, выберите страну и язык");
+                                    resp.AppendLine("Андан аркы аракет үчүн өлкөңүздү жана тилиңизди тандаңыз");
+                                    var country1 = new InlineKeyboardMarkup(new[]
+                                                            {
+                                                new[]{ new InlineKeyboardButton("Қазақстан") { Text = "Қазақстан", CallbackData = "KAZ" } },
+                                                 new[]{ new InlineKeyboardButton("Кыргызстан ") { Text = "Кыргызстан ", CallbackData = "KGZ" } }
+                                            });
+                                    await _botClient.SendTextMessageAsync(update.Message.Chat.Id, resp.ToString(), ParseMode.Markdown, replyMarkup: country1);
+                                    await _sessionService.Update(session, OperationType.start);
+                                }
+                                else
+                                {
+                                    var auth = await _authService.GetOrCreate(ChatId);
+                                    PromoCode promo = new PromoCode();
+                                    promo.channel = 1;
+                                    promo.code = text;
+                                    promo.phone = auth.phone;
+                                    var promoResult = await _service.PromocodeActivation(promo, session.Token);
+                                    await _botClient.SendTextMessageAsync(ChatId, promoResult.success? promoResult.data.FirstOrDefault().message: "Произошла ощибка, повторите попытку ещё раз",
+                                        ParseMode.Markdown, replyMarkup: mainMenu);
+                                    await _sessionService.Update(session, OperationType.Promotion);
+                                }
+                                break;
                             case OperationType.birth_day:
                                 try
                                 {
@@ -156,11 +183,13 @@ namespace RGBTelegram.Commands
                                                 new[]{ new InlineKeyboardButton(session.language== Language.Rus? "Женщина": "Аял")
                                                 { Text = session.language == Language.Rus ? "Женщина" : "Аял", CallbackData = "2" } }
                                             });
-                                    await _botClient.SendTextMessageAsync(ChatId, session.language == Language.Rus ? "Имя:" : "Аты:", ParseMode.Markdown, replyMarkup: sex);
+                                    await _botClient.SendTextMessageAsync(ChatId, session.language == Language.Rus ? "Пол:" : "Жынысы:", ParseMode.Markdown, replyMarkup: sex);
 
                                 }
                                 catch
-                                { }
+                                {
+                                    await _botClient.SendTextMessageAsync(ChatId, "Не удалось конвертировать дату, введите в формате ДД.ММ.ГГГГ (пример 25.01.1991):", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                                }
                                 break;
                             case OperationType.first_name:
                                 registration = await _regService.GetOrCreate(ChatId);
@@ -193,7 +222,7 @@ namespace RGBTelegram.Commands
                                 var call = await _service.AuthByPassword(data);
                                 if (call.success)
                                 {
-                                    await _sessionService.Update(session, OperationType.menu, authorised: true);
+                                    await _sessionService.Update(session, OperationType.menu, token: call.data.FirstOrDefault().message, authorised: true);
                                     await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.menu, session.language),
                                         ParseMode.Markdown, replyMarkup: _languageText.GetMainMenu(session.language, true));
                                 }
@@ -283,7 +312,7 @@ namespace RGBTelegram.Commands
                                 {
                                     await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.regSMSConfirm, session.language),
                                                                             ParseMode.Markdown, replyMarkup: _languageText.GetMainMenu(session.language, true));
-                                    await _sessionService.Update(session, OperationType.menu, true);
+                                    await _sessionService.Update(session, OperationType.menu, authorised: true);
                                 }
                                 else
                                 {

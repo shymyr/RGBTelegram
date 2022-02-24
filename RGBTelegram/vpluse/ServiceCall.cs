@@ -37,25 +37,127 @@ namespace RGBTelegram.vpluse
             }
             return Response;
         }
+
+        public async Task<HttpResponseMessage> CallServiceAuthorize(StringContent content, string action, string methodType, string token)
+        {
+            string apiBaseUrl = "https://staging-gateway.vpluse.me/";
+            string endpoint = apiBaseUrl + action;
+            HttpResponseMessage Response = new HttpResponseMessage();
+            using (HttpClient client = new HttpClient())
+            {
+                var authString = Convert.ToBase64String(Encoding.UTF8.GetBytes(token + ":"));
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authString);
+                switch (methodType)
+                {
+                    case "POST":
+                        Response = await client.PostAsync(endpoint, content);
+                        break;
+                    case "GET":
+                        Response = await client.GetAsync(endpoint);
+                        break;
+                    case "PUT":
+                        Response = await client.PutAsync(endpoint, content);
+                        break;
+                    case "DELETE":
+                        Response = await client.DeleteAsync(endpoint);
+                        break;
+                }
+            }
+            return Response;
+        }
         public async Task<ErrorData> AuthByPassword(AuthData auth)
         {
             ErrorData result = new ErrorData();
-                       StringContent content = new StringContent(JsonConvert.SerializeObject(auth), Encoding.UTF8, "application/json");
+            StringContent content = new StringContent(JsonConvert.SerializeObject(auth), Encoding.UTF8, "application/json");
             var Response = await CallService(content, "v2/client/action/auth-by-password", "POST");
+            var resp = await Response.Content.ReadAsStringAsync();
             switch (Response.StatusCode)
             {
                 case System.Net.HttpStatusCode.Created:
+                    result.data = new List<Data>();
+                    JObject details = JObject.Parse(resp);
+                    var token = details["data"]["token"].ToString();
+                    result.data.Add(new Data() { field = "token", message = token });
                     result.success = true;
                     break;
                 case System.Net.HttpStatusCode.UnprocessableEntity:
                 case System.Net.HttpStatusCode.InternalServerError:
-                    var resp = await Response.Content.ReadAsStringAsync();
                     result = JsonConvert.DeserializeObject<ErrorData>(resp);
                     break;
             }
             return result;
         }
-
+        public async Task<Bundles> GetBundles(string token)
+        {
+            //
+            Bundles result = new Bundles();
+            var Response = await CallServiceAuthorize(null, "v2/nauryzpromo/attempts/bundles/1?count=10", "GET", token);
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    result.gifts = new List<Gifts>();
+                    JObject details = JObject.Parse(resp);
+                    foreach (var items in details["data"]["items"].ToArray())
+                    {
+                        JObject gifts = JObject.Parse(items.ToString());
+                        foreach (var gift in gifts["gifts"].ToArray())
+                        {
+                            Gifts gift1 = new Gifts();
+                            gift1.created_at = gift["created_at"].ToString();
+                            gift1.status = gift["status"].ToString();
+                            gift1.namekz = gift["name"]["kz"].ToString();
+                            gift1.nameru = gift["name"]["ru"].ToString();
+                            gift1.namekg = gift["name"]["kg"].ToString();
+                            gift1.description = gift["description"].ToString();
+                            result.gifts.Add(gift1);
+                        }
+                        foreach (var attempts in gifts["attempts"].ToArray())
+                        {
+                            Attempts attempt = new Attempts();
+                            attempt.createt_at = attempts["createt_at"].ToString();
+                            attempt.promocode = attempts["promocode"].ToString();
+                            attempt.product = attempts["add_info"]["product_id"].ToString();
+                            attempt.brand = attempts["add_info"]["brand_id"].ToString();
+                            result.attempts.Add(attempt);
+                        }
+                    }
+                    result.status = 200;
+                    result.success = true;
+                    break;
+                case System.Net.HttpStatusCode.UnprocessableEntity:
+                case System.Net.HttpStatusCode.InternalServerError:
+                    var err = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.error = err;
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = err.data.First().message;
+                    break;
+            }
+            return result;
+        }
+        public async Task<ErrorData> PromocodeActivation(PromoCode promo, string token)
+        {
+            ErrorData result = new ErrorData();
+            StringContent content = new StringContent(JsonConvert.SerializeObject(promo), Encoding.UTF8, "application/json");
+            var Response = await CallServiceAuthorize(content, "v2/client/promo/codes", "POST", token);
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.Created:
+                    result.data = new List<Data>();
+                    JObject details = JObject.Parse(resp);
+                    result.success = true;
+                    var mesage = details["data"]["message"].ToString();
+                    result.data.Add(new Data() { field = "message", message = mesage });
+                    break;
+                case System.Net.HttpStatusCode.UnprocessableEntity:
+                case System.Net.HttpStatusCode.InternalServerError:
+                    result = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    break;
+            }
+            return result;
+        }
         public async Task<SignUp> Register(Registration registration)
         {
             SignUp result = new SignUp();
@@ -221,7 +323,7 @@ namespace RGBTelegram.vpluse
                     foreach (var item in details["data"].ToArray())
                     {
                         Item item1 = new Item();
-                        item1.id = int.Parse(item["id"].ToString());                        
+                        item1.id = int.Parse(item["id"].ToString());
                         switch (language)
                         {
                             case Language.KAZ:
