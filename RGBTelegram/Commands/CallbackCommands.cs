@@ -160,7 +160,7 @@ namespace RGBTelegram.Commands
                                 });
 
                                 await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), ParseMode.Markdown, replyMarkup: mainMenu);
-                                
+
                                 break;
                             case 401:
                                 switch (session.language)
@@ -181,7 +181,7 @@ namespace RGBTelegram.Commands
 
                                 break;
                         }
-                       
+
                     }
                     break;
                 case "Promotion"://"Об акции"
@@ -200,9 +200,23 @@ namespace RGBTelegram.Commands
                     }
                     else
                     {
-                        var about = await _service.About(((int)session.country), session.language);
-                        await _botClient.SendTextMessageAsync(ChatId, about.Items.FirstOrDefault().name, ParseMode.Markdown, replyMarkup: mainMenu);
-                        await _sessionService.Update(session, OperationType.Promotion);
+                        try
+                        {
+                            var about = await _service.About(session.country == Country.KAZ ? 1 : 2, session.language);
+                            if (about.success)
+                            {
+                                await _botClient.SendTextMessageAsync(ChatId, about.message, ParseMode.MarkdownV2, replyMarkup: mainMenu);
+                                await _sessionService.Update(session, OperationType.Promotion);
+                            }
+                            else
+                            {
+                                await _botClient.SendTextMessageAsync(ChatId, about.message, parseMode: ParseMode.MarkdownV2, replyMarkup: mainMenu);
+                            }
+                        }
+                        catch (Exception err)
+                        {
+                            await _botClient.SendTextMessageAsync(ChatId, err.Message, parseMode: ParseMode.MarkdownV2, replyMarkup: mainMenu);
+                        }
                     }
                     break;
                 case "Promocode"://Ввести код

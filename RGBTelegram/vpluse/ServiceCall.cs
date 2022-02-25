@@ -136,7 +136,7 @@ namespace RGBTelegram.vpluse
             }
             return result;
         }
-        public async Task<ErrorData> PromocodeActivation(PromoCode promo, string token)
+        public async Task<ErrorData> PromocodeActivation(PromoCode promo, string token, Language language)
         {
             ErrorData result = new ErrorData();
             StringContent content = new StringContent(JsonConvert.SerializeObject(promo), Encoding.UTF8, "application/json");
@@ -148,7 +148,21 @@ namespace RGBTelegram.vpluse
                     result.data = new List<Data>();
                     JObject details = JObject.Parse(resp);
                     result.success = true;
-                    var mesage = details["data"]["message"].ToString();
+                    string mesage = "";
+                    var messages = details["data"]["gift"]["messages"].First;
+                    switch (language)
+                    {
+                        case Language.KAZ:
+                            mesage = messages["kz"].ToString();
+                            break;
+                        case Language.Rus:
+                            mesage = messages["ru"].ToString();
+                            break;
+                        case Language.KGZ:
+                            mesage = messages["kg"].ToString();
+                            break;
+                    }
+                    
                     result.data.Add(new Data() { field = "message", message = mesage });
                     break;
                 case System.Net.HttpStatusCode.UnprocessableEntity:
@@ -314,6 +328,7 @@ namespace RGBTelegram.vpluse
             Family result = new Family();
             var Response = await CallService(null, $"v2/nauryzpromo/about/{countryId}", "GET");
             var resp = await Response.Content.ReadAsStringAsync();
+            StringBuilder builder = new StringBuilder();
             switch (Response.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
@@ -337,9 +352,11 @@ namespace RGBTelegram.vpluse
                                 break;
                         }
                         result.Items.Add(item1);
+                        builder.AppendLine(item1.name);
                     }
                     result.status = 200;
                     result.success = true;
+                    result.message = builder.ToString();
                     break;
                 case System.Net.HttpStatusCode.UnprocessableEntity:
                 case System.Net.HttpStatusCode.InternalServerError:

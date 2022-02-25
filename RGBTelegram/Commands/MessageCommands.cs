@@ -164,8 +164,8 @@ namespace RGBTelegram.Commands
                                     promo.channel = 1;
                                     promo.code = text;
                                     promo.phone = auth.phone;
-                                    var promoResult = await _service.PromocodeActivation(promo, session.Token);
-                                    await _botClient.SendTextMessageAsync(ChatId, promoResult.success? promoResult.data.FirstOrDefault().message: "Произошла ощибка, повторите попытку ещё раз",
+                                    var promoResult = await _service.PromocodeActivation(promo, session.Token, session.language);
+                                    await _botClient.SendTextMessageAsync(ChatId, promoResult.success ? promoResult.data.FirstOrDefault().message : "Произошла ощибка, повторите попытку ещё раз",
                                         ParseMode.Markdown, replyMarkup: mainMenu);
                                     await _sessionService.Update(session, OperationType.Promotion);
                                 }
