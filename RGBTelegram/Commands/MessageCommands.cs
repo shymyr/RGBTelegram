@@ -168,8 +168,34 @@ namespace RGBTelegram.Commands
                 case "Промокодтар тарихы":
                 case "История промокодов":
                 case "Промокоддордун тарыхы":
-                    var expire = await _service.TokenExpire(session.expire.Value);
-                    if (expire)
+                    if (session.expire.HasValue)
+                    {
+                        var expire = await _service.TokenExpire(session.expire.Value);
+                        if (expire)
+                        {
+                            var auth = await _authService.GetOrCreate(ChatId);
+                            var data = await _service.AuthByPassword(auth);
+                            if (data.success)
+                            {
+                                await _sessionService.Update(session, OperationType.menu, token: data.data.FirstOrDefault().message, expire: double.Parse(data.data.FirstOrDefault().field));
+                            }
+                            else
+                            {
+                                if (data.status == 422)
+                                    if (data.data.FirstOrDefault().message == "Неверный логин или пароль")
+                                    {
+                                        await _sessionService.Update(session, OperationType.start, authorised: false);
+                                        await _botClient.SendTextMessageAsync(ChatId, "Вам необходимо пройти авторизацию заново!", replyMarkup: mainMenu);
+                                    }
+                                    else
+                                        await _botClient.SendTextMessageAsync(ChatId, "Произошла ощибка, повторите попытку ещё раз", replyMarkup: mainMenu);
+                                else
+                                    await _botClient.SendTextMessageAsync(ChatId, "Произошла ощибка, повторите попытку ещё раз", replyMarkup: mainMenu);
+                                return;
+                            }
+                        }
+                    }
+                    else
                     {
                         var auth = await _authService.GetOrCreate(ChatId);
                         var data = await _service.AuthByPassword(auth);
@@ -183,7 +209,7 @@ namespace RGBTelegram.Commands
                                 if (data.data.FirstOrDefault().message == "Неверный логин или пароль")
                                 {
                                     await _sessionService.Update(session, OperationType.start, authorised: false);
-                                    await _botClient.SendTextMessageAsync(ChatId, "Вам необходимо пройти авторизацию заново!", replyMarkup: mainMenu);                                    
+                                    await _botClient.SendTextMessageAsync(ChatId, "Вам необходимо пройти авторизацию заново!", replyMarkup: mainMenu);
                                 }
                                 else
                                     await _botClient.SendTextMessageAsync(ChatId, "Произошла ощибка, повторите попытку ещё раз", replyMarkup: mainMenu);
@@ -263,13 +289,13 @@ namespace RGBTelegram.Commands
                     }
                     break;
                 case "/start":
-                    //if (session.Authorized)
-                    //{
-                    //    await _sessionService.Update(session, OperationType.menu);
-                    //    await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.menu, session.language),
-                    //        ParseMode.Markdown, replyMarkup: _languageText.GetMainMenu(session.language, session.Authorized));
-                    //}
-                    //else
+                    if (session.Authorized)
+                    {
+                        await _sessionService.Update(session, OperationType.menu);
+                        await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.menu, session.language),
+                            ParseMode.Markdown, replyMarkup: _languageText.GetMainMenu(session.language, session.Authorized));
+                    }
+                    else
                     {
                         resp.AppendLine("Тіркеліңіз, қақпақ астындағы кодтарды белсендіріңіз және сыйлықтар ұтып алу мүмкіндігіне ие болыңыз!");
                         resp.AppendLine("Регистрируйтесь, активируйте коды из под крышек и получите шанс выиграть призы!");
@@ -331,8 +357,33 @@ namespace RGBTelegram.Commands
                                 break;
                             case OperationType.Promocode:
                                 var auth = await _authService.GetOrCreate(ChatId);
-                                var expirePromo = await _service.TokenExpire(session.expire.Value);
-                                if (expirePromo)
+                                if (session.expire.HasValue)
+                                {
+                                    var expirePromo = await _service.TokenExpire(session.expire.Value);
+                                    if (expirePromo)
+                                    {
+                                        var dataPromo = await _service.AuthByPassword(auth);
+                                        if (dataPromo.success)
+                                        {
+                                            await _sessionService.Update(session, OperationType.menu, token: dataPromo.data.FirstOrDefault().message, expire: double.Parse(dataPromo.data.FirstOrDefault().field));
+                                        }
+                                        else
+                                        {
+                                            if (dataPromo.status == 422)
+                                                if (dataPromo.data.FirstOrDefault().message == "Неверный логин или пароль")
+                                                {
+                                                    await _sessionService.Update(session, OperationType.start, authorised: false);
+                                                    await _botClient.SendTextMessageAsync(ChatId, "Вам необходимо пройти авторизацию заново!", replyMarkup: mainMenu);
+                                                }
+                                                else
+                                                    await _botClient.SendTextMessageAsync(ChatId, "Произошла ощибка, повторите попытку ещё раз", replyMarkup: mainMenu);
+                                            else
+                                                await _botClient.SendTextMessageAsync(ChatId, "Произошла ощибка, повторите попытку ещё раз", replyMarkup: mainMenu);
+                                            return;
+                                        }
+                                    }
+                                }
+                                else
                                 {
                                     var dataPromo = await _service.AuthByPassword(auth);
                                     if (dataPromo.success)
@@ -345,7 +396,7 @@ namespace RGBTelegram.Commands
                                             if (dataPromo.data.FirstOrDefault().message == "Неверный логин или пароль")
                                             {
                                                 await _sessionService.Update(session, OperationType.start, authorised: false);
-                                                await _botClient.SendTextMessageAsync(ChatId, "Вам необходимо пройти авторизацию заново!", replyMarkup: mainMenu);                                               
+                                                await _botClient.SendTextMessageAsync(ChatId, "Вам необходимо пройти авторизацию заново!", replyMarkup: mainMenu);
                                             }
                                             else
                                                 await _botClient.SendTextMessageAsync(ChatId, "Произошла ощибка, повторите попытку ещё раз", replyMarkup: mainMenu);
@@ -359,8 +410,7 @@ namespace RGBTelegram.Commands
                                 promo.code = text;
                                 promo.phone = auth.phone;
                                 var promoResult = await _service.PromocodeActivation(promo, session.Token, session.language);
-                                await _botClient.SendTextMessageAsync(ChatId, promoResult.success ? promoResult.data.FirstOrDefault().message : "Произошла ощибка, повторите попытку ещё раз",
-                                    ParseMode.Markdown, replyMarkup: mainMenu);
+                                await _botClient.SendTextMessageAsync(ChatId, promoResult.data.FirstOrDefault().message, ParseMode.Markdown, replyMarkup: mainMenu);
                                 await _sessionService.Update(session, OperationType.Promotion);
                                 break;
                             case OperationType.birth_day:

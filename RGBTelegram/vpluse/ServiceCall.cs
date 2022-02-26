@@ -163,11 +163,9 @@ namespace RGBTelegram.vpluse
                             mesage = messages["kg"].ToString();
                             break;
                     }
-
                     result.data.Add(new Data() { field = "message", message = mesage });
                     break;
-                case System.Net.HttpStatusCode.UnprocessableEntity:
-                case System.Net.HttpStatusCode.InternalServerError:
+                default:
                     result = JsonConvert.DeserializeObject<ErrorData>(resp);
                     break;
             }
