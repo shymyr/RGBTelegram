@@ -30,8 +30,8 @@ namespace RGBTelegram.Services
             if (update?.Message?.Chat == null && update?.CallbackQuery == null)
                 return;
 
-            if ((DateTime.UtcNow - session.dateTime).Minutes < 15)
-            {
+            //if ((DateTime.UtcNow - session.dateTime).Minutes < 15)
+            //{
                 switch (update.Type)
                 {
                     case UpdateType.Message:
@@ -41,18 +41,18 @@ namespace RGBTelegram.Services
                         await ExecuteCommand("callback", update, session);
                         break;
                 }
-            }
-            else
-            {
-                InlineKeyboardMarkup mainMenu = new InlineKeyboardMarkup(new[]
-                                         {
-                                                new[]{ new InlineKeyboardButton("Меню") { Text = "Меню", CallbackData = "mainmenu" } }
-                                            });
-                await _botClient.SendTextMessageAsync(update?.Message?.Chat.Id ?? update?.CallbackQuery?.Message?.Chat.Id, "Ваша сессия закрыто. Пожалуйста, авторизуйтесь и начните заново!",
-                    parseMode: ParseMode.Markdown, replyMarkup: mainMenu);
-                await _sessionService.Delete(session);
+            //}
+            //else
+            //{
+            //    InlineKeyboardMarkup mainMenu = new InlineKeyboardMarkup(new[]
+            //                             {
+            //                                    new[]{ new InlineKeyboardButton("Меню") { Text = "Меню", CallbackData = "mainmenu" } }
+            //                                });
+            //    await _botClient.SendTextMessageAsync(update?.Message?.Chat.Id ?? update?.CallbackQuery?.Message?.Chat.Id, "Ваша сессия закрыто. Пожалуйста, авторизуйтесь и начните заново!",
+            //        parseMode: ParseMode.Markdown, replyMarkup: mainMenu);
+            //    await _sessionService.Delete(session);
 
-            }
+            //}
         }
 
         private async Task ExecuteCommand(string commandName, Update update, UserSession session)

@@ -55,7 +55,7 @@ namespace RGBTelegram.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task Update(UserSession session, OperationType operation,string token=null, bool? authorised =null,Country? country = null, Language? language = null)
+        public async Task Update(UserSession session, OperationType operation,string token=null, bool? authorised =null,Country? country = null, Language? language = null, double? expire = null)
         {
             session.dateTime = DateTime.UtcNow;
             session.Type = operation;
@@ -67,6 +67,8 @@ namespace RGBTelegram.Services
                 session.country = country.Value;
             if (language.HasValue)
                 session.language = language.Value;
+            if (expire.HasValue)
+                session.expire = expire;
             _context.UserSessions.Update(session);
             await _context.SaveChangesAsync();
         }

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RGBTelegram.Entities;
+using RGBTelegram.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,7 +78,7 @@ namespace RGBTelegram.vpluse
                     result.data = new List<Data>();
                     JObject details = JObject.Parse(resp);
                     var token = details["data"]["token"].ToString();
-                    result.data.Add(new Data() { field = "token", message = token });
+                    result.data.Add(new Data() { field = details["data"]["token_expired"].ToString(), message = token });
                     result.success = true;
                     break;
                 case System.Net.HttpStatusCode.UnprocessableEntity:
@@ -162,7 +163,7 @@ namespace RGBTelegram.vpluse
                             mesage = messages["kg"].ToString();
                             break;
                     }
-                    
+
                     result.data.Add(new Data() { field = "message", message = mesage });
                     break;
                 case System.Net.HttpStatusCode.UnprocessableEntity:
@@ -198,6 +199,19 @@ namespace RGBTelegram.vpluse
             return result;
         }
 
+        public async Task<bool> TokenExpire(double expire)
+        {
+            var expTime = ConvertFromUnixTimestamp(expire);
+            if (expTime >= DateTime.Now.AddSeconds(5))
+                return true;
+            else
+                return false;
+        }
+        public DateTime ConvertFromUnixTimestamp(double timestamp)
+        {
+            DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            return origin.AddSeconds(timestamp).ToLocalTime();
+        }
         public async Task<ErrorData> SignUpConfirm(string phone, string sms_password)
         {
             ErrorData result = new ErrorData();
@@ -337,22 +351,25 @@ namespace RGBTelegram.vpluse
                     result.Items = new List<Item>();
                     foreach (var item in details["data"].ToArray())
                     {
-                        Item item1 = new Item();
-                        item1.id = int.Parse(item["id"].ToString());
-                        switch (language)
+                        if (item["description"].ToString() != "{}")
                         {
-                            case Language.KAZ:
-                                item1.name = item["description"]["kz"].ToString();
-                                break;
-                            case Language.KGZ:
-                                item1.name = item["description"]["kg"].ToString();
-                                break;
-                            case Language.Rus:
-                                item1.name = item["description"]["ru"].ToString();
-                                break;
+                            Item item1 = new Item();
+                            item1.id = int.Parse(item["id"].ToString());
+                            switch (language)
+                            {
+                                case Language.KAZ:
+                                    item1.name = item["description"]["kz"].ToString();
+                                    break;
+                                case Language.KGZ:
+                                    item1.name = item["description"]["kg"].ToString();
+                                    break;
+                                case Language.Rus:
+                                    item1.name = item["description"]["ru"].ToString();
+                                    break;
+                            }
+                            result.Items.Add(item1);
+                            builder.AppendLine(item1.name);
                         }
-                        result.Items.Add(item1);
-                        builder.AppendLine(item1.name);
                     }
                     result.status = 200;
                     result.success = true;

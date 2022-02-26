@@ -37,7 +37,8 @@ namespace RGBTelegram.Entities
         birth_day=93,
         birth_month=94,
         birth_year=95,
-        gender=96
+        gender=96,
+        languageChange = 99
 
 
     }

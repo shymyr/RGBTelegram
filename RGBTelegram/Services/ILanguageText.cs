@@ -10,8 +10,9 @@ namespace RGBTelegram.Services
     public interface ILanguageText
     {
         Task<string> GetTextFromLanguage(OperationType operation, Language language);
-        InlineKeyboardMarkup GetKeyboard(UserSession session);
-        InlineKeyboardMarkup GetMainMenu(Language language, bool Authorized);
+        ReplyKeyboardMarkup GetKeyboard(UserSession session);
+        ReplyKeyboardMarkup GetLanguage(Country country);
+        ReplyKeyboardMarkup GetMainMenu(Language language, bool Authorized);
         ReplyKeyboardMarkup GetPhoneMarkup(Language language);
         string GetCallCenter(Country country, Language language);
         string GetWinnerList(Country country, Language language);

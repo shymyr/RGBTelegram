@@ -17,5 +17,6 @@ namespace RGBTelegram.Entities
         public Country country { get; set; }
         public Language language { get; set; } 
         public string Token { get; set; }
+        public double? expire { get; set; }
     }
 }

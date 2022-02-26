@@ -15,6 +15,20 @@ namespace RGBTelegram.Services
             StringBuilder result = new StringBuilder();
             switch (operation)
             {
+                case OperationType.languageChange:
+                    switch (language)
+                    {
+                        case Language.KAZ:
+                            result.AppendLine(@"Сіз қызмет көрсету тілін сәтті ауыстырдыңыз.. Қажетті операцияны таңдаңыз!");
+                            break;
+                        case Language.Rus:
+                            result.AppendLine(@"Вы успешно сменили язык обслуживания. Выберите необходимую операцию!");
+                            break;
+                        case Language.KGZ:
+                            result.AppendLine("Сизге кызмат көрсөтүүнү ийгиликтүү алмаштырдыңыз. Керектүү операцияны тандаңыз!");
+                            break;
+                    }
+                    break;
                 case OperationType.regSMSConfirm:
                     switch (language)
                     {
@@ -181,7 +195,7 @@ namespace RGBTelegram.Services
                             result.AppendLine(@"«Телефонмен бөлісу» батырмасы арқылы маған өз нөміріңізді жіберіңіз");
                             break;
                         case Language.Rus:
-                            result.AppendLine(@"Отправьте мнесвой номер телефона с помощью кнопки «Поделиться телефоном»");
+                            result.AppendLine(@"Отправьте мне свой номер телефона с помощью кнопки «Поделиться телефоном»");
                             break;
                         case Language.KGZ:
                             result.AppendLine("\"Телефонду бөлүшүү\" баскычын колдонуп, телефон номериңизди мага жөнөтүңүз");
@@ -192,62 +206,79 @@ namespace RGBTelegram.Services
             return result.ToString();
         }
 
-        public InlineKeyboardMarkup GetKeyboard(UserSession session)
+        public ReplyKeyboardMarkup GetLanguage(Country country)
         {
-            List<List<InlineKeyboardButton>> Buttons = new List<List<InlineKeyboardButton>>();
-            switch (session.Type)
+            List<List<KeyboardButton>> Buttons = new List<List<KeyboardButton>>();
+            switch (country)
             {
-                case OperationType.language:
-                    #region Language
-                    switch (session.language)
-                    {
-                        case Language.KAZ:
-                            Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Науқан туралы") { Text = "Науқан туралы", CallbackData = "Promotion" } });
-                            Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Авторизация") { Text = "Авторизация", CallbackData = "Authorization" } });
-                            Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Тіркеу") { Text = "Тіркеу", CallbackData = "Registration" } });
-                            break;
-                        case Language.KGZ:
-                            Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Акция жөнүндө") { Text = "Акция жөнүндө", CallbackData = "Promotion" } });
-                            Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Авторизация") { Text = "Авторизация", CallbackData = "Authorization" } });
-                            Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Каттоо") { Text = "Каттоо", CallbackData = "Registration" } });
-                            break;
-                        case Language.Rus:
-                            Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Об Акции") { Text = "Об Акции", CallbackData = "Promotion" } });
-                            Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Авторизация") { Text = "Авторизация", CallbackData = "Authorization" } });
-                            Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Регистрация") { Text = "Регистрация", CallbackData = "Registration" } });
-                            break;
-                    }
-                    #endregion
+                case Country.KAZ:
+                    Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Қазақ тілі") { Text = "Қазақ тілі" } });
+                    Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Русский") { Text = "Русский" } });
                     break;
-                case OperationType.menu:
+                case Country.KGZ:
+                    Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Русский") { Text = "Русский" } });
+                    Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Кыргызский") { Text = "Кыргызский" } });
+                    break;
+            }
+            return new ReplyKeyboardMarkup(Buttons);
+        }
+
+        public ReplyKeyboardMarkup GetKeyboard(UserSession session)
+        {
+            List<List<KeyboardButton>> Buttons = new List<List<KeyboardButton>>();
+            //switch (session.Type)
+            //{
+                //case OperationType.language:
+                //    #region Language
+                //    switch (session.language)
+                //    {
+                //        case Language.KAZ:
+                //            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Науқан туралы") { Text = "Науқан туралы" } });//Promotion
+                //            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Авторизация") { Text = "Авторизация" } });//, CallbackData = "Authorization" }
+                //            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Тіркеу") { Text = "Тіркеу" } });//, CallbackData = "Registration" }
+                //            break;
+                //        case Language.KGZ:
+                //            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Акция жөнүндө") { Text = "Акция жөнүндө" } });//, CallbackData = "Promotion" }
+                //            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Авторизация") { Text = "Авторизация" } });//, CallbackData = "Authorization" }
+                //            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Каттоо") { Text = "Каттоо" } });//, CallbackData = "Registration" }
+                //            break;
+                //        case Language.Rus:
+                //            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Об Акции") { Text = "Об Акции" } });//, CallbackData = "Promotion" }
+                //            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Авторизация") { Text = "Авторизация" } });//, CallbackData = "Authorization" }
+                //            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Регистрация") { Text = "Регистрация" } });//, CallbackData = "Registration" }
+                //            break;
+                //    }
+                //    #endregion
+                //    break;
+                //case OperationType.menu:
                     #region MainMenu
                     if (session.Authorized)
                     {
                         switch (session.language)
                         {
                             case Language.KAZ:
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Науқан туралы") { Text = "Науқан туралы", CallbackData = "Promotion" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Кодты іске қосу") { Text = "Кодты іске қосу", CallbackData = "Promocode" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Науқан ережелері") { Text = "Науқан ережелері", CallbackData = "ProRule" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Жеңімпаздардың тізімі") { Text = "Жеңімпаздардың тізімі", CallbackData = "WinnerList" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Жедел желі телефоны") { Text = "Жедел желі телефоны", CallbackData = "CallCenter" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Промокодтар тарихы") { Text = "Промокодтар тарихы", CallbackData = "History" } });
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Науқан туралы") { Text = "Науқан туралы" } });//Promotion
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Кодты іске қосу") { Text = "Кодты іске қосу" } });//Promocode
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Науқан ережелері") { Text = "Науқан ережелері" } });//ProRule
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Жеңімпаздардың тізімі") { Text = "Жеңімпаздардың тізімі" } });//WinnerList
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Жедел желі телефоны") { Text = "Жедел желі телефоны" } });//CallCenter
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Промокодтар тарихы") { Text = "Промокодтар тарихы" } });//History
                                 break;
                             case Language.Rus:
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Об акции") { Text = "Об акции", CallbackData = "Promotion" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Активировать код") { Text = "Активировать код", CallbackData = "Promocode" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Правила акции") { Text = "Правила акции", CallbackData = "ProRule" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Список победителей") { Text = "Список победителей", CallbackData = "WinnerList" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Телефон горячей линии") { Text = "Телефон горячей линии", CallbackData = "CallCenter" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("История промокодов") { Text = "История промокодов", CallbackData = "History" } });
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Об Акции") { Text = "Об Акции" } });//, CallbackData = "Promotion" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Активировать код") { Text = "Активировать код" } });//, CallbackData = "Promocode" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Правила акции") { Text = "Правила акции" } });//, CallbackData = "ProRule" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Список победителей") { Text = "Список победителей" } });//, CallbackData = "WinnerList" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Телефон горячей линии") { Text = "Телефон горячей линии" } });//, CallbackData = "CallCenter" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("История промокодов") { Text = "История промокодов" } });//, CallbackData = "History" }
                                 break;
                             case Language.KGZ:
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Акция жөнүндө") { Text = "Акция жөнүндө", CallbackData = "Promotion" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Кодду активдештирүү") { Text = "Активировать код", CallbackData = "Promocode" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Акциянын эрежелери") { Text = "Акциянын эрежелери", CallbackData = "ProRule" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Жеңүүчүлөрдүн тизмеги") { Text = "Жеңүүчүлөрдүн тизмеги", CallbackData = "WinnerList" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Тынымсыз байланыш телефону") { Text = "Тынымсыз байланыш телефону", CallbackData = "CallCenter" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Промокоддордун тарыхы") { Text = "Промокоддордун тарыхы", CallbackData = "History" } });
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Акция жөнүндө") { Text = "Акция жөнүндө" } });//, CallbackData = "Promotion" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Кодду активдештирүү") { Text = "Кодду активдештирүү" } });//, CallbackData = "Promocode" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Акциянын эрежелери") { Text = "Акциянын эрежелери" } });//, CallbackData = "ProRule" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Жеңүүчүлөрдүн тизмеги") { Text = "Жеңүүчүлөрдүн тизмеги" } });//, CallbackData = "WinnerList" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Тынымсыз байланыш телефону") { Text = "Тынымсыз байланыш телефону" } });//, CallbackData = "CallCenter" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Промокоддордун тарыхы") { Text = "Промокоддордун тарыхы" } });//, CallbackData = "History" }
                                 break;
                         }
                     }
@@ -256,60 +287,60 @@ namespace RGBTelegram.Services
                         switch (session.language)
                         {
                             case Language.KAZ:
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Науқан туралы") { Text = "Науқан туралы", CallbackData = "Promotion" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Авторизация") { Text = "Авторизация", CallbackData = "Authorization" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Тіркеу") { Text = "Тіркеу", CallbackData = "Registration" } });
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Науқан туралы") { Text = "Науқан туралы" } });//Promotion
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Авторизация") { Text = "Авторизация" } });//, CallbackData = "Authorization" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Тіркеу") { Text = "Тіркеу" } });//, CallbackData = "Registration" }
                                 break;
                             case Language.KGZ:
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Акция жөнүндө") { Text = "Акция жөнүндө", CallbackData = "Promotion" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Авторизация") { Text = "Авторизация", CallbackData = "Authorization" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Каттоо") { Text = "Каттоо", CallbackData = "Registration" } });
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Акция жөнүндө") { Text = "Акция жөнүндө" } });//, CallbackData = "Promotion" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Авторизация") { Text = "Авторизация" } });//, CallbackData = "Authorization" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Каттоо") { Text = "Каттоо" } });//, CallbackData = "Registration" }
                                 break;
                             case Language.Rus:
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Об Акции") { Text = "Об Акции", CallbackData = "Promotion" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Авторизация") { Text = "Авторизация", CallbackData = "Authorization" } });
-                                Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Регистрация") { Text = "Регистрация", CallbackData = "Registration" } });
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Об Акции") { Text = "Об Акции" } });//, CallbackData = "Promotion" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Авторизация") { Text = "Авторизация" } });//, CallbackData = "Authorization" }
+                                Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Регистрация") { Text = "Регистрация" } });//, CallbackData = "Registration" }
                                 break;
                         }
                     }
                     #endregion
-                    break;
-            }
+            //        break;
+            //}
 
-            return new InlineKeyboardMarkup(Buttons); ;
+            return new ReplyKeyboardMarkup(Buttons);
         }
 
-        public InlineKeyboardMarkup GetMainMenu(Language language, bool Authorized)
+        public ReplyKeyboardMarkup GetMainMenu(Language language, bool Authorized)
         {
-            List<List<InlineKeyboardButton>> Buttons = new List<List<InlineKeyboardButton>>();
+            List<List<KeyboardButton>> Buttons = new List<List<KeyboardButton>>();
             #region MainMenu
             if (Authorized)
             {
                 switch (language)
                 {
                     case Language.KAZ:
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Науқан туралы") { Text = "Науқан туралы", CallbackData = "Promotion" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Кодты іске қосу") { Text = "Кодты іске қосу", CallbackData = "Promocode" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Науқан ережелері") { Text = "Науқан ережелері", CallbackData = "ProRule" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Жеңімпаздардың тізімі") { Text = "Жеңімпаздардың тізімі", CallbackData = "WinnerList" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Жедел желі телефоны") { Text = "Жедел желі телефоны", CallbackData = "CallCenter" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Промокодтар тарихы") { Text = "Промокодтар тарихы", CallbackData = "History" } });
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Науқан туралы") { Text = "Науқан туралы" } });//Promotion
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Кодты іске қосу") { Text = "Кодты іске қосу" } });//Promocode
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Науқан ережелері") { Text = "Науқан ережелері" } });//ProRule
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Жеңімпаздардың тізімі") { Text = "Жеңімпаздардың тізімі" } });//WinnerList
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Жедел желі телефоны") { Text = "Жедел желі телефоны" } });//CallCenter
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Промокодтар тарихы") { Text = "Промокодтар тарихы" } });//History
                         break;
                     case Language.Rus:
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Об акции") { Text = "Об акции", CallbackData = "Promotion" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Активировать код") { Text = "Активировать код", CallbackData = "Promocode" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Правила акции") { Text = "Правила акции", CallbackData = "ProRule" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Список победителей") { Text = "Список победителей", CallbackData = "WinnerList" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Телефон горячей линии") { Text = "Телефон горячей линии", CallbackData = "CallCenter" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("История промокодов") { Text = "История промокодов", CallbackData = "History" } });
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Об Акции") { Text = "Об Акции" } });//, CallbackData = "Promotion" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Активировать код") { Text = "Активировать код" } });//, CallbackData = "Promocode" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Правила акции") { Text = "Правила акции" } });//, CallbackData = "ProRule" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Список победителей") { Text = "Список победителей" } });//, CallbackData = "WinnerList" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Телефон горячей линии") { Text = "Телефон горячей линии" } });//, CallbackData = "CallCenter" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("История промокодов") { Text = "История промокодов" } });//, CallbackData = "History" }
                         break;
                     case Language.KGZ:
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Акция жөнүндө") { Text = "Акция жөнүндө", CallbackData = "Promotion" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Кодду активдештирүү") { Text = "Активировать код", CallbackData = "Promocode" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Акциянын эрежелери") { Text = "Акциянын эрежелери", CallbackData = "ProRule" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Жеңүүчүлөрдүн тизмеги") { Text = "Жеңүүчүлөрдүн тизмеги", CallbackData = "WinnerList" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Тынымсыз байланыш телефону") { Text = "Тынымсыз байланыш телефону", CallbackData = "CallCenter" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Промокоддордун тарыхы") { Text = "Промокоддордун тарыхы", CallbackData = "History" } });
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Акция жөнүндө") { Text = "Акция жөнүндө" } });//, CallbackData = "Promotion" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Кодду активдештирүү") { Text = "Кодду активдештирүү" } });//, CallbackData = "Promocode" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Акциянын эрежелери") { Text = "Акциянын эрежелери" } });//, CallbackData = "ProRule" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Жеңүүчүлөрдүн тизмеги") { Text = "Жеңүүчүлөрдүн тизмеги" } });//, CallbackData = "WinnerList" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Тынымсыз байланыш телефону") { Text = "Тынымсыз байланыш телефону" } });//, CallbackData = "CallCenter" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Промокоддордун тарыхы") { Text = "Промокоддордун тарыхы" } });//, CallbackData = "History" }
                         break;
                 }
             }
@@ -318,24 +349,24 @@ namespace RGBTelegram.Services
                 switch (language)
                 {
                     case Language.KAZ:
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Науқан туралы") { Text = "Науқан туралы", CallbackData = "Promotion" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Авторизация") { Text = "Авторизация", CallbackData = "Authorization" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Тіркеу") { Text = "Тіркеу", CallbackData = "Registration" } });
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Науқан туралы") { Text = "Науқан туралы" } });//Promotion
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Авторизация") { Text = "Авторизация" } });//, CallbackData = "Authorization" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Тіркеу") { Text = "Тіркеу" } });//, CallbackData = "Registration" }
                         break;
                     case Language.KGZ:
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Акция жөнүндө") { Text = "Акция жөнүндө", CallbackData = "Promotion" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Авторизация") { Text = "Авторизация", CallbackData = "Authorization" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Каттоо") { Text = "Каттоо", CallbackData = "Registration" } });
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Акция жөнүндө") { Text = "Акция жөнүндө" } });//, CallbackData = "Promotion" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Авторизация") { Text = "Авторизация" } });//, CallbackData = "Authorization" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Каттоо") { Text = "Каттоо" } });//, CallbackData = "Registration" }
                         break;
                     case Language.Rus:
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Об Акции") { Text = "Об Акции", CallbackData = "Promotion" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Авторизация") { Text = "Авторизация", CallbackData = "Authorization" } });
-                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton("Регистрация") { Text = "Регистрация", CallbackData = "Registration" } });
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Об Акции") { Text = "Об Акции" } });//, CallbackData = "Promotion" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Авторизация") { Text = "Авторизация" } });//, CallbackData = "Authorization" }
+                        Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Регистрация") { Text = "Регистрация" } });//, CallbackData = "Registration" }
                         break;
                 }
             }
             #endregion
-            return new InlineKeyboardMarkup(Buttons);
+            return new ReplyKeyboardMarkup(Buttons);
         }
 
         public ReplyKeyboardMarkup GetPhoneMarkup(Language language)
