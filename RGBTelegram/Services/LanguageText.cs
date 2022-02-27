@@ -19,7 +19,7 @@ namespace RGBTelegram.Services
                     switch (language)
                     {
                         case Language.KAZ:
-                            result.AppendLine(@"Сіз қызмет көрсету тілін сәтті ауыстырдыңыз.. Қажетті операцияны таңдаңыз!");
+                            result.AppendLine(@"Сіз қызмет көрсету тілін сәтті ауыстырдыңыз. Қажетті операцияны таңдаңыз!");
                             break;
                         case Language.Rus:
                             result.AppendLine(@"Вы успешно сменили язык обслуживания. Выберите необходимую операцию!");
