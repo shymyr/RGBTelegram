@@ -188,9 +188,9 @@ namespace RGBTelegram.Commands
                                         await _botClient.SendTextMessageAsync(ChatId, "Вам необходимо пройти авторизацию заново!", replyMarkup: mainMenu);
                                     }
                                     else
-                                        await _botClient.SendTextMessageAsync(ChatId, "Произошла ощибка, повторите попытку ещё раз", replyMarkup: mainMenu);
+                                        await _botClient.SendTextMessageAsync(ChatId, data.data.FirstOrDefault().message, replyMarkup: mainMenu);
                                 else
-                                    await _botClient.SendTextMessageAsync(ChatId, "Произошла ощибка, повторите попытку ещё раз", replyMarkup: mainMenu);
+                                    await _botClient.SendTextMessageAsync(ChatId, data.data.FirstOrDefault().message, replyMarkup: mainMenu);
                                 return;
                             }
                         }
@@ -212,9 +212,9 @@ namespace RGBTelegram.Commands
                                     await _botClient.SendTextMessageAsync(ChatId, "Вам необходимо пройти авторизацию заново!", replyMarkup: mainMenu);
                                 }
                                 else
-                                    await _botClient.SendTextMessageAsync(ChatId, "Произошла ощибка, повторите попытку ещё раз", replyMarkup: mainMenu);
+                                    await _botClient.SendTextMessageAsync(ChatId, data.data.FirstOrDefault().message, replyMarkup: mainMenu);
                             else
-                                await _botClient.SendTextMessageAsync(ChatId, "Произошла ощибка, повторите попытку ещё раз", replyMarkup: mainMenu);
+                                await _botClient.SendTextMessageAsync(ChatId, data.data.FirstOrDefault().message, replyMarkup: mainMenu);
                             return;
                         }
                     }
