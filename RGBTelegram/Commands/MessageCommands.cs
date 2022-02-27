@@ -171,7 +171,7 @@ namespace RGBTelegram.Commands
                     if (session.expire.HasValue)
                     {
                         var expire = await _service.TokenExpire(session.expire.Value);
-                        if (expire)
+                        if (!expire)
                         {
                             var auth = await _authService.GetOrCreate(ChatId);
                             var data = await _service.AuthByPassword(auth);
@@ -360,7 +360,7 @@ namespace RGBTelegram.Commands
                                 if (session.expire.HasValue)
                                 {
                                     var expirePromo = await _service.TokenExpire(session.expire.Value);
-                                    if (expirePromo)
+                                    if (!expirePromo)
                                     {
                                         var dataPromo = await _service.AuthByPassword(auth);
                                         if (dataPromo.success)
