@@ -3,6 +3,7 @@ using RGBTelegram.Services;
 using RGBTelegram.vpluse;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -289,6 +290,7 @@ namespace RGBTelegram.Commands
                     }
                     break;
                 case "/start":
+                    #region Start
                     if (session.Authorized)
                     {
                         await _sessionService.Update(session, OperationType.menu);
@@ -297,18 +299,31 @@ namespace RGBTelegram.Commands
                     }
                     else
                     {
+                        const string screen = "C:/nauryz.jpeg";
                         resp.AppendLine("Тіркеліңіз, қақпақ астындағы кодтарды белсендіріңіз және сыйлықтар ұтып алу мүмкіндігіне ие болыңыз!");
                         resp.AppendLine("Регистрируйтесь, активируйте коды из под крышек и получите шанс выиграть призы!");
                         resp.AppendLine();
                         resp.AppendLine("Елді таңдаңыз:");
                         resp.AppendLine("Выберите страну:");
+
                         List<List<KeyboardButton>> countries = new List<List<KeyboardButton>>();
                         countries.Add(new List<KeyboardButton>() { new KeyboardButton("Қазақстан") { Text = "Қазақстан" } });//KAZ
                         countries.Add(new List<KeyboardButton>() { new KeyboardButton("Кыргызстан") { Text = "Кыргызстан" } });//KGZ
                         var country = new ReplyKeyboardMarkup(countries);
-                        await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), ParseMode.Markdown, replyMarkup: country);
+
+                        using (var fileStream = new FileStream(screen, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        {
+                            await _botClient.SendPhotoAsync(
+                                chatId: ChatId,
+                                photo: new InputOnlineFile(fileStream),
+                                caption: resp.ToString(),
+                                replyMarkup: country
+                            );
+                        }
+                        //await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), ParseMode.Markdown, replyMarkup: country);
                         await _sessionService.Update(session, OperationType.start);
                     }
+                    #endregion
                     break;
                 default:
                     if (update.Message.Contact != null)
@@ -356,6 +371,7 @@ namespace RGBTelegram.Commands
                                 await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), replyMarkup: _languageText.GetKeyboard(session));
                                 break;
                             case OperationType.Promocode:
+                                #region Активировать промокод
                                 var auth = await _authService.GetOrCreate(ChatId);
                                 if (session.expire.HasValue)
                                 {
@@ -410,8 +426,43 @@ namespace RGBTelegram.Commands
                                 promo.code = text;
                                 promo.phone = auth.phone;
                                 var promoResult = await _service.PromocodeActivation(promo, session.Token, session.language);
-                                await _botClient.SendTextMessageAsync(ChatId, promoResult.data.FirstOrDefault().message, ParseMode.Markdown, replyMarkup: mainMenu);
-                                await _sessionService.Update(session, OperationType.Promotion);
+                                if (promoResult.success)
+                                {
+                                    resp.AppendLine(promoResult.message);
+                                    if (promoResult.messages.Count > 0)
+                                    {
+                                        promoResult.messages.ForEach(mess =>
+                                        {
+                                            resp.AppendLine(session.language == Language.KAZ ? mess.kz :
+                                                (session.language == Language.KGZ ? mess.kg : mess.ru));
+                                        });
+                                    }
+                                    if (promoResult.gifts.Count > 0)
+                                    {
+                                        promoResult.gifts.ForEach(gift =>
+                                        {
+                                            resp.AppendLine(session.language == Language.KAZ ? gift.namekz :
+                                                (session.language == Language.KGZ ? gift.namekg : gift.nameru));
+                                        });
+                                    }
+                                    if (promoResult.attempts.Count > 0)
+                                    {
+                                        resp.AppendLine();
+                                        resp.AppendLine("Промокод:");
+                                        promoResult.gifts.ForEach(gift =>
+                                        {
+                                            resp.AppendLine(session.language == Language.KAZ ? gift.namekz :
+                                                (session.language == Language.KGZ ? gift.namekg : gift.nameru));
+                                        });
+                                    }
+                                    await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), ParseMode.Markdown, replyMarkup: mainMenu);
+                                    await _sessionService.Update(session, OperationType.Promotion);
+                                }
+                                else
+                                {
+                                    await _botClient.SendTextMessageAsync(ChatId, promoResult.message, ParseMode.Markdown, replyMarkup: mainMenu);
+                                }
+                                #endregion
                                 break;
                             case OperationType.birth_day:
                                 try

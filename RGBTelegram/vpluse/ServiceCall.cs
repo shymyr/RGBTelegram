@@ -137,36 +137,61 @@ namespace RGBTelegram.vpluse
             }
             return result;
         }
-        public async Task<ErrorData> PromocodeActivation(PromoCode promo, string token, Language language)
+        public async Task<Promo> PromocodeActivation(PromoCode promo, string token, Language language)
         {
-            ErrorData result = new ErrorData();
+            Promo result = new Promo();
             StringContent content = new StringContent(JsonConvert.SerializeObject(promo), Encoding.UTF8, "application/json");
             var Response = await CallServiceAuthorize(content, "v2/client/promo/codes", "POST", token);
             var resp = await Response.Content.ReadAsStringAsync();
             switch (Response.StatusCode)
             {
                 case System.Net.HttpStatusCode.Created:
-                    result.data = new List<Data>();
                     JObject details = JObject.Parse(resp);
-                    result.success = true;
-                    string mesage = "";
-                    var messages = details["data"]["gift"]["messages"].First;
-                    switch (language)
+                    foreach (var items in details["data"]["gift"].ToArray())
                     {
-                        case Language.KAZ:
-                            mesage = messages["kz"].ToString();
-                            break;
-                        case Language.Rus:
-                            mesage = messages["ru"].ToString();
-                            break;
-                        case Language.KGZ:
-                            mesage = messages["kg"].ToString();
-                            break;
+                        JObject gifts = JObject.Parse(items.ToString());
+
+                        foreach (var sms in gifts["messages"].ToArray())
+                        {
+                            Messages mess = new Messages();
+                            mess.kz = sms["kz"].ToString();
+                            mess.ru = sms["ru"].ToString();
+                            mess.kg = sms["kg"].ToString();
+                            result.messages.Add(mess);
+                        }
+
+                        foreach (var gift in gifts["gifts"].ToArray())
+                        {
+                            Gifts gift1 = new Gifts();
+                            gift1.created_at = gift["created_at"].ToString();
+                            gift1.status = gift["status"].ToString();
+                            gift1.namekz = gift["name"]["kz"].ToString();
+                            gift1.nameru = gift["name"]["ru"].ToString();
+                            gift1.namekg = gift["name"]["kg"].ToString();
+                            gift1.description = gift["description"].ToString();
+                            result.gifts.Add(gift1);
+                        }
+                        foreach (var attempts in gifts["attempts"].ToArray())
+                        {
+                            Attempts attempt = new Attempts();
+                            attempt.createt_at = attempts["createt_at"].ToString();
+                            attempt.promocode = attempts["promocode"].ToString();
+                            attempt.product = attempts["add_info"]["product_id"].ToString();
+                            attempt.brand = attempts["add_info"]["brand_id"].ToString();
+                            result.attempts.Add(attempt);
+                        }
                     }
-                    result.data.Add(new Data() { field = "message", message = mesage });
+                    result.status = 200;
+                    result.success = true;
+                    string mesage = details["data"]["message"].ToString();
+                    result.message = mesage;
                     break;
                 default:
-                    result = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    var err = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.error = err;
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = err.data.First().message;
                     break;
             }
             return result;

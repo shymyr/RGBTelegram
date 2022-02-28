@@ -11,7 +11,7 @@ namespace RGBTelegram.vpluse
     {
         Task<ErrorData> AuthByPassword(AuthData auth);
         Task<Bundles> GetBundles(string token);
-        Task<ErrorData> PromocodeActivation(PromoCode promo, string token, Language language);
+        Task<Promo> PromocodeActivation(PromoCode promo, string token, Language language);
         Task<SignUp> Register(Registration registration);
         Task<bool> TokenExpire(double expire);
         Task<ErrorData> SignUpConfirm(string phone, string sms_password);
