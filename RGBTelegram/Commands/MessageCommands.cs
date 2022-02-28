@@ -449,10 +449,9 @@ namespace RGBTelegram.Commands
                                     {
                                         resp.AppendLine();
                                         resp.AppendLine("Промокод:");
-                                        promoResult.gifts.ForEach(gift =>
+                                        promoResult.attempts.ForEach(att =>
                                         {
-                                            resp.AppendLine(session.language == Language.KAZ ? gift.namekz :
-                                                (session.language == Language.KGZ ? gift.namekg : gift.nameru));
+                                            resp.AppendLine(att.promocode);
                                         });
                                     }
                                     await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), ParseMode.Markdown, replyMarkup: mainMenu);

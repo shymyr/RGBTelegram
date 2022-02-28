@@ -147,39 +147,38 @@ namespace RGBTelegram.vpluse
             {
                 case System.Net.HttpStatusCode.Created:
                     JObject details = JObject.Parse(resp);
-                    foreach (var items in details["data"]["gift"].ToArray())
+                    var items = details["data"]["gift"].ToString();
+
+                    JObject gifts = JObject.Parse(items.ToString());
+
+                    foreach (var sms in gifts["messages"].ToArray())
                     {
-                        JObject gifts = JObject.Parse(items.ToString());
+                        Messages mess = new Messages();
+                        mess.kz = sms["kz"].ToString();
+                        mess.ru = sms["ru"].ToString();
+                        mess.kg = sms["kg"].ToString();
+                        result.messages.Add(mess);
+                    }
 
-                        foreach (var sms in gifts["messages"].ToArray())
-                        {
-                            Messages mess = new Messages();
-                            mess.kz = sms["kz"].ToString();
-                            mess.ru = sms["ru"].ToString();
-                            mess.kg = sms["kg"].ToString();
-                            result.messages.Add(mess);
-                        }
-
-                        foreach (var gift in gifts["gifts"].ToArray())
-                        {
-                            Gifts gift1 = new Gifts();
-                            gift1.created_at = gift["created_at"].ToString();
-                            gift1.status = gift["status"].ToString();
-                            gift1.namekz = gift["name"]["kz"].ToString();
-                            gift1.nameru = gift["name"]["ru"].ToString();
-                            gift1.namekg = gift["name"]["kg"].ToString();
-                            gift1.description = gift["description"].ToString();
-                            result.gifts.Add(gift1);
-                        }
-                        foreach (var attempts in gifts["attempts"].ToArray())
-                        {
-                            Attempts attempt = new Attempts();
-                            attempt.createt_at = attempts["createt_at"].ToString();
-                            attempt.promocode = attempts["promocode"].ToString();
-                            attempt.product = attempts["add_info"]["product_id"].ToString();
-                            attempt.brand = attempts["add_info"]["brand_id"].ToString();
-                            result.attempts.Add(attempt);
-                        }
+                    foreach (var gift in gifts["gifts"].ToArray())
+                    {
+                        Gifts gift1 = new Gifts();
+                        gift1.created_at = gift["created_at"].ToString();
+                        gift1.status = gift["status"].ToString();
+                        gift1.namekz = gift["name"]["kz"].ToString();
+                        gift1.nameru = gift["name"]["ru"].ToString();
+                        gift1.namekg = gift["name"]["kg"].ToString();
+                        gift1.description = gift["description"].ToString();
+                        result.gifts.Add(gift1);
+                    }
+                    foreach (var attempts in gifts["attempts"].ToArray())
+                    {
+                        Attempts attempt = new Attempts();
+                        attempt.createt_at = attempts["createt_at"].ToString();
+                        attempt.promocode = attempts["promocode"].ToString();
+                        attempt.product = attempts["add_info"]["product_id"].ToString();
+                        attempt.brand = attempts["add_info"]["brand_id"].ToString();
+                        result.attempts.Add(attempt);
                     }
                     result.status = 200;
                     result.success = true;
