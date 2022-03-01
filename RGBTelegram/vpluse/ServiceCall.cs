@@ -185,6 +185,12 @@ namespace RGBTelegram.vpluse
                     string mesage = details["data"]["message"].ToString();
                     result.message = mesage;
                     break;
+                case System.Net.HttpStatusCode.NotFound:
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = language == Language.KAZ ? "Код табылмады.Кодтың дұрыс енгізілгенін тексеріңіз" :
+                        (language == Language.KGZ ? "Код табылган жок. Коддунтуура киргизилгендигин текшериңиз" : "Код не найден. Проверьте правильно ли введён код");
+                    break;
                 default:
                     var err = JsonConvert.DeserializeObject<ErrorData>(resp);
                     result.error = err;
