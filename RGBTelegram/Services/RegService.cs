@@ -78,11 +78,13 @@ namespace RGBTelegram.Services
 
             return registration;
         }
-        public async Task<UZRegistration> UZUpdate(UZRegistration registration, long ChatId, string phone = null, int? city_id = null, string name = null,
+        public async Task<UZRegistration> UZUpdate(UZRegistration registration, long ChatId, string phone = null,int? region_id = null, int? city_id = null, string name = null,
             string surname = null, string middle_name = null, string birthdate = null)
         {
             if (!string.IsNullOrEmpty(phone))
                 registration.phone = phone;
+            if (region_id.HasValue)
+                registration.region_id = region_id.Value.ToString();
             if (city_id.HasValue)
                 registration.city_id = city_id.Value;
             if (!string.IsNullOrEmpty(name))

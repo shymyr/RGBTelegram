@@ -102,11 +102,13 @@ namespace RGBTelegram.Services
             _context.UserSessions.Update(session);
             await _context.SaveChangesAsync();
         }
-        public async Task UZUpdate(UZSession session, UZOperType operation)
+        public async Task UZUpdate(UZSession session, UZOperType operation, Language? language = null)
         {
             session.dateTime = DateTime.UtcNow;
             session.Type = operation;           
             _context.UZSessions.Update(session);
+            if (language.HasValue)
+                session.language = language.Value;
             await _context.SaveChangesAsync();
         }
 

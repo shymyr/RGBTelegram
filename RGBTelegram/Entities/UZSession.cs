@@ -13,5 +13,6 @@ namespace RGBTelegram.Entities
         public long? UserId { get; set; }
         public DateTime dateTime { get; set; } = DateTime.UtcNow;
         public UZOperType Type { get; set; }
-       }
+        public Language language { get; set; }
+    }
 }

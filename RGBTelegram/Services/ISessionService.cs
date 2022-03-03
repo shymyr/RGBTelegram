@@ -14,6 +14,6 @@ namespace RGBTelegram.Services
         Task Delete(UserSession session);
         Task UZDelete(UZSession session);
         Task Update(UserSession session, OperationType operation, string token = null, bool? authorised = null, Country? country = null, Language? language = null, double? expire = null);
-        Task UZUpdate(UZSession session, UZOperType operation);
+        Task UZUpdate(UZSession session, UZOperType operation, Language? language = null);
     }
 }

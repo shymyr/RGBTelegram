@@ -38,6 +38,31 @@ namespace RGBTelegram.vpluse
             }
             return Response;
         }
+        public async Task<HttpResponseMessage> CallServiceUZB(StringContent content, string action, string methodType)
+        {
+            string apiBaseUrl = "https://staging-gateway.vpluse.me/";
+            string endpoint = apiBaseUrl + action;
+            HttpResponseMessage Response = new HttpResponseMessage();
+            using (HttpClient client = new HttpClient())
+            {
+                switch (methodType)
+                {
+                    case "POST":
+                        Response = await client.PostAsync(endpoint, content);
+                        break;
+                    case "GET":
+                        Response = await client.GetAsync(endpoint);
+                        break;
+                    case "PUT":
+                        Response = await client.PutAsync(endpoint, content);
+                        break;
+                    case "DELETE":
+                        Response = await client.DeleteAsync(endpoint);
+                        break;
+                }
+            }
+            return Response;
+        }
 
         public async Task<HttpResponseMessage> CallServiceAuthorize(StringContent content, string action, string methodType, string token)
         {
@@ -70,7 +95,7 @@ namespace RGBTelegram.vpluse
         public async Task<ErrorData> UZCheckRegistration(string phone)
         {
             ErrorData result = new ErrorData();
-            var Response = await CallService(null, $"v2/nauryzpromo/uzb/check-registration/{phone}", "GET");
+            var Response = await CallServiceUZB(null, $"v2/nauryzpromo/uzb/check-registration/{phone}", "GET");
             var resp = await Response.Content.ReadAsStringAsync();
             switch (Response.StatusCode)
             {
@@ -78,10 +103,16 @@ namespace RGBTelegram.vpluse
                     result.status = 200;
                     JObject details = JObject.Parse(resp);
                     var isRegistred = details["data"]["is_registered"].ToString(); //is_registered
-                    if (isRegistred == "true")
+                    if (isRegistred.ToLower() == "true")
                         result.success = true;
                     else
                         result.success = false;
+                    break;
+                case System.Net.HttpStatusCode.Unauthorized:
+                    result.status = 401;
+                    result.success = false;
+                    result.data = new List<Data>();
+                    result.data.Add(new Data() { message = "Не авторизован" });
                     break;
                 default:
                     result = JsonConvert.DeserializeObject<ErrorData>(resp);

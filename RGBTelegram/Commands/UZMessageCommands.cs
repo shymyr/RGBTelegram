@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RGBTelegram.Commands
@@ -17,11 +18,13 @@ namespace RGBTelegram.Commands
         private readonly ISessionService _sessionService;
         private readonly IServiceCall _service;
         private readonly IRegService _regService;
-        public UZMessageCommands(ISessionService sessionService, IServiceCall service, IRegService regService)
+        private readonly ILanguageText _languageText;
+        public UZMessageCommands(ISessionService sessionService, IServiceCall service, IRegService regService, ILanguageText languageText)
         {
             _sessionService = sessionService;
             _service = service;
             _regService = regService;
+            _languageText = languageText;
         }
         public override string Name => "message";
 
@@ -29,16 +32,18 @@ namespace RGBTelegram.Commands
         {
             var text = update.Message.Text;
             var ChatId = update.Message.Chat.Id;
-            await _botClient.SendTextMessageAsync(ChatId, text);
+            //await _botClient.SendTextMessageAsync(ChatId, text);
+            UZRegistration registration = new UZRegistration();
             StringBuilder resp = new StringBuilder();
             switch (text)
             {
+                case "/language":
+                    await _sessionService.UZUpdate(session, UZOperType.language);
+                    await _botClient.SendTextMessageAsync(ChatId, "Выберите язык:", ParseMode.Markdown, replyMarkup: _languageText.GetLanguage(Country.UZB));
+                    break;
                 case "/start":
-                    resp.AppendLine("Привет я бот, тут вы можете регистрироваться. Для регистрации отправьте мне свой номер телефона с помощью кнопки «Поделиться телефоном» ");
-                    var phone = new ReplyKeyboardMarkup(new KeyboardButton("Поделиться телефоном") { Text = "Поделиться телефоном", RequestContact = true });
-                    phone.ResizeKeyboard = true;
-                    await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), replyMarkup: phone);
-                    await _sessionService.UZUpdate(session, UZOperType.start);
+                    await _sessionService.UZUpdate(session, UZOperType.languageSet);
+                    await _botClient.SendTextMessageAsync(ChatId, "Выберите язык:", ParseMode.Markdown, replyMarkup: _languageText.GetLanguage(Country.UZB));
                     break;
                 default:
                     if (update.Message.Contact != null)
@@ -49,8 +54,114 @@ namespace RGBTelegram.Commands
                         {
                             if (check.success)
                             {
-                               await _botClient.SendTextMessageAsync(ChatId, "Вы уже регистрированы", replyMarkup: new ReplyKeyboardRemove());
+                                await _botClient.SendTextMessageAsync(ChatId, "Вы уже регистрированы", replyMarkup: new ReplyKeyboardRemove());
                             }
+                            else
+                            {
+                                registration = await _regService.UZGetOrCreate(ChatId);
+                                await _regService.UZUpdate(registration, ChatId, phone: uzPhone);
+                                var regions = await _service.GetRegions(3);
+                                if (regions.status == 200)
+                                {
+                                   // await _regService.UZUpdate(registration, ChatId, region_id: int.Parse(text));
+                                    List<List<InlineKeyboardButton>> Buttons = new List<List<InlineKeyboardButton>>();
+                                    regions.Items.ForEach(rr =>
+                                    {
+                                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton(rr.name) { Text = rr.name, CallbackData = rr.id.ToString() } });
+                                    });
+                                    var regs = new InlineKeyboardMarkup(Buttons);
+                                    await _sessionService.UZUpdate(session, UZOperType.region);
+                                    await _botClient.SendTextMessageAsync(ChatId, session.language == Language.Rus ? "Укажите регион:" : "Hududni belgilang:", replyMarkup: regs);
+                                }
+                                else
+                                {
+                                    await _botClient.SendTextMessageAsync(ChatId, regions.message);
+                                }
+                            }
+                        }
+                        else
+                            await _botClient.SendTextMessageAsync(ChatId, check.data.FirstOrDefault().message, replyMarkup: new ReplyKeyboardRemove());
+                    }
+                    else
+                    {
+                        registration = await _regService.UZGetOrCreate(ChatId);
+                        switch (session.Type)
+                        {
+                            case UZOperType.languageSet:
+                                var lan = text == "Русский" ? Language.Rus : Language.UZB;
+                                await _sessionService.UZUpdate(session, UZOperType.start, language: lan);
+                                ReplyKeyboardMarkup phone;
+                                if (lan == Language.Rus)
+                                {
+                                    resp.AppendLine("Для регистрации отправьте мне свой номер телефона с помощью кнопки «Поделиться телефоном»");
+                                    phone = new ReplyKeyboardMarkup(new KeyboardButton("Поделиться телефоном") { Text = "Поделиться телефоном", RequestContact = true });
+                                }
+                                else
+                                {
+                                    resp.AppendLine("Ro‘yxatdan o‘tish uchun «Telefonni ulashish» tugmasi orqali menga telefon raqamingizni yuboring");
+                                    phone = new ReplyKeyboardMarkup(new KeyboardButton("Telefonni ulashish") { Text = "Telefonni ulashish", RequestContact = true });
+                                }
+                                phone.ResizeKeyboard = true;
+                                phone.OneTimeKeyboard = true;
+                                await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), replyMarkup: phone);
+                                await _sessionService.UZUpdate(session, UZOperType.start);
+                                break;
+                            case UZOperType.language:
+                                var lanCh = text == "Русский" ? Language.Rus : Language.UZB;
+                                await _sessionService.UZUpdate(session, UZOperType.start, language: lanCh);
+                                resp.AppendLine(await _languageText.GetTextFromUZ(UZOperType.language, lanCh));
+                                await _botClient.SendTextMessageAsync(ChatId, resp.ToString());
+                                break;
+                            case UZOperType.phone:
+                                var regions = await _service.GetRegions(3);
+                                if (regions.status == 200)
+                                {
+                                    await _regService.UZUpdate(registration, ChatId, region_id: int.Parse(text));
+                                    List<List<InlineKeyboardButton>> Buttons = new List<List<InlineKeyboardButton>>();
+                                    regions.Items.ForEach(rr =>
+                                    {
+                                        Buttons.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton(rr.name) { Text = rr.name, CallbackData = rr.id.ToString() } });
+                                    });
+                                    var regs = new InlineKeyboardMarkup(Buttons);
+                                    await _sessionService.UZUpdate(session, UZOperType.region);
+                                    await _botClient.SendTextMessageAsync(ChatId, session.language == Language.Rus ? "Укажите регион:" : "Hududni belgilang:", replyMarkup: regs);
+                                }
+                                else
+                                {
+                                    await _botClient.SendTextMessageAsync(ChatId, regions.message);
+                                }
+                                break;
+                            case UZOperType.name:
+                                await _regService.UZUpdate(registration, ChatId, name: text);
+                                await _sessionService.UZUpdate(session, UZOperType.surname);
+                                await _botClient.SendTextMessageAsync(ChatId, session.language == Language.Rus ? "Укажите фамилию:" : "Iltimos, familiyangizni kiriting:", replyMarkup: new ReplyKeyboardRemove());
+                                break;
+                            case UZOperType.surname:
+                                await _regService.UZUpdate(registration, ChatId, surname: text);
+                                await _sessionService.UZUpdate(session, UZOperType.middle_name);
+                                var skip = new InlineKeyboardMarkup(new[]
+                                         {
+                                                new[]{ new InlineKeyboardButton(session.language== Language.Rus? "Пропустить": "Oʻtkazib yuborish")
+                                                { Text = session.language == Language.Rus ? "Пропустить" : "Oʻtkazib yuborish", CallbackData = "Skip" } }
+                                            });
+                                await _botClient.SendTextMessageAsync(ChatId, session.language == Language.Rus ? "Укажите отчество(При наличий):" : "Iltimos, otasining ismini kiriting(agar mavjud bo'lsa):", ParseMode.Markdown, replyMarkup: skip);
+                                break;
+                            case UZOperType.middle_name:
+                                await _regService.UZUpdate(registration, ChatId, middle_name: text);
+                                resp.AppendLine(await _languageText.GetTextFromUZ(UZOperType.middle_name, session.language));
+                                await _sessionService.UZUpdate(session, UZOperType.birthdate);
+                                await _botClient.SendTextMessageAsync(ChatId, resp.ToString());
+                                break;
+                            case UZOperType.birthdate:
+                                try {
+                                    await _regService.UZUpdate(registration, ChatId, birthdate: text);
+                                    await _botClient.SendTextMessageAsync(ChatId, "что должно произойти при регистрации? ждем ответа от Бекайдара и Марата");
+                                }
+                                catch
+                                {
+                                    await _botClient.SendTextMessageAsync(ChatId, "Не удалось конвертировать дату, введите в формате ДД.ММ.ГГГГ (пример 25.01.1991):", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                                }
+                                break;
                         }
                     }
                     break;

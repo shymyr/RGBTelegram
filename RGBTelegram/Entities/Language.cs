@@ -9,6 +9,7 @@ namespace RGBTelegram.Entities
     {
         KAZ=1,
         Rus=2,
-        KGZ=3
+        KGZ=3,
+        UZB =4
     }
 }

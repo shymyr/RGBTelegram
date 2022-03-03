@@ -8,6 +8,7 @@ namespace RGBTelegram.Entities
     public enum Country
     {
         KAZ=1,
-        KGZ=2
+        KGZ=2,
+        UZB=3
     }
 }
