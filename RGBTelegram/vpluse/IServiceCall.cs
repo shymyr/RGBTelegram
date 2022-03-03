@@ -9,6 +9,7 @@ namespace RGBTelegram.vpluse
 {
     public interface IServiceCall
     {
+        Task<ErrorData> UZCheckRegistration(string phone);
         Task<ErrorData> AuthByPassword(AuthData auth);
         Task<Bundles> GetBundles(string token);
         Task<Promo> PromocodeActivation(PromoCode promo, string token, Language language);

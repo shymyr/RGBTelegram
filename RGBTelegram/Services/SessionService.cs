@@ -48,13 +48,43 @@ namespace RGBTelegram.Services
             await _context.SaveChangesAsync();
             return newSession;
         }
+        public async Task<UZSession> UZGetOrCreate(Update update)
+        {
+            var user = await _userService.GetUZUser(update);
+            var sesion = await _context.UZSessions.FirstOrDefaultAsync(x => x.User == user);
+            if (sesion != null)
+            {
+                return sesion;
+            }
 
+            var newSession = update.Type switch
+            {
+                UpdateType.CallbackQuery => new UZSession
+                {
+                    User = user,
+                    UserId = update.CallbackQuery.Message.Chat.Id
+                },
+                UpdateType.Message => new UZSession
+                {
+                    User = user,
+                    UserId = update.Message.Chat.Id,
+                    dateTime = DateTime.UtcNow
+                }
+            };
+            await _context.UZSessions.AddAsync(newSession);
+            await _context.SaveChangesAsync();
+            return newSession;
+        }
         public async Task Delete(UserSession session)
         {
             _context.UserSessions.Remove(session);
             await _context.SaveChangesAsync();
         }
-
+        public async Task UZDelete(UZSession session)
+        {
+            _context.UZSessions.Remove(session);
+            await _context.SaveChangesAsync();
+        }
         public async Task Update(UserSession session, OperationType operation,string token=null, bool? authorised =null,Country? country = null, Language? language = null, double? expire = null)
         {
             session.dateTime = DateTime.UtcNow;
@@ -72,6 +102,13 @@ namespace RGBTelegram.Services
             _context.UserSessions.Update(session);
             await _context.SaveChangesAsync();
         }
-       
+        public async Task UZUpdate(UZSession session, UZOperType operation)
+        {
+            session.dateTime = DateTime.UtcNow;
+            session.Type = operation;           
+            _context.UZSessions.Update(session);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

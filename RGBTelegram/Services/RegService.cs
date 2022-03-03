@@ -27,6 +27,18 @@ namespace RGBTelegram.Services
             return result.Entity;
         }
 
+        public async Task<UZRegistration> UZGetOrCreate(long ChatId, string phone = null)
+        {
+            var reg = await _context.UZRegistrations.FirstOrDefaultAsync(x => x.ChatId == ChatId);
+
+            if (reg != null) return reg;
+
+            var result = await _context.UZRegistrations.AddAsync(new UZRegistration() { ChatId = ChatId, phone = phone });
+            await _context.SaveChangesAsync();
+
+            return result.Entity;
+        }
+
         public async Task<Registration> Update(Registration registration, long ChatId, string phone = null, string password = null, string first_name = null,
             string last_name = null, string middlename = null, string gender = null, string family_stat = null, string birth_day = null,
             string email = null, int? city_id = null, int? region_id = null, string iin = null)
@@ -62,6 +74,29 @@ namespace RGBTelegram.Services
                 registration.iin = iin;
 
             _context.Registrations.Update(registration);
+            await _context.SaveChangesAsync();
+
+            return registration;
+        }
+        public async Task<UZRegistration> UZUpdate(UZRegistration registration, long ChatId, string phone = null, int? city_id = null, string name = null,
+            string surname = null, string middle_name = null, string birthdate = null)
+        {
+            if (!string.IsNullOrEmpty(phone))
+                registration.phone = phone;
+            if (city_id.HasValue)
+                registration.city_id = city_id.Value;
+            if (!string.IsNullOrEmpty(name))
+                registration.name = name;
+            if (!string.IsNullOrEmpty(surname))
+                registration.surname = surname;
+            if (!string.IsNullOrEmpty(middle_name))
+                registration.middle_name = middle_name;
+            if (!string.IsNullOrEmpty(birthdate))
+            {
+                registration.birthdate = DateTime.Parse(birthdate).ToShortDateString();
+            }
+
+            _context.UZRegistrations.Update(registration);
             await _context.SaveChangesAsync();
 
             return registration;

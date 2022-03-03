@@ -10,5 +10,6 @@ namespace RGBTelegram.Services
     public interface IUserService
     {
         Task<AppUser> GetOrCreate(Update update);
+        Task<UZUser> GetUZUser(Update update);
     }
 }

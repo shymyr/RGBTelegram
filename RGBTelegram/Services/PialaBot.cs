@@ -7,31 +7,28 @@ using Telegram.Bot;
 
 namespace RGBTelegram.Services
 {
-    public class TelegramBot
+    public class PialaBot
     {
         private readonly IConfiguration _configuration;
         private TelegramBotClient _botClient;
-
-        public TelegramBot(IConfiguration configuration)
+        public PialaBot(IConfiguration configuration)
         {
             _configuration = configuration;
         }
 
-        public async Task<TelegramBotClient> GetBot()
+        public async Task<TelegramBotClient> GetPialaBot()
         {
             if (_botClient != null)
             {
                 return _botClient;
             }
 
-            _botClient = new TelegramBotClient(_configuration["Token"]);
+            _botClient = new TelegramBotClient(_configuration["Piala_Token"]);
 
-            var hook = $"{_configuration["Url"]}api/message/update";
+            var hook = $"{_configuration["Url"]}api/piala/update";
             await _botClient.SetWebhookAsync(hook);
-
+            var me =  _botClient.GetMeAsync().Result;
             return _botClient;
         }
-      
-       
     }
 }

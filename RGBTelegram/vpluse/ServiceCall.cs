@@ -66,6 +66,30 @@ namespace RGBTelegram.vpluse
             }
             return Response;
         }
+
+        public async Task<ErrorData> UZCheckRegistration(string phone)
+        {
+            ErrorData result = new ErrorData();
+            var Response = await CallService(null, $"v2/nauryzpromo/uzb/check-registration/{phone}", "GET");
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    result.status = 200;
+                    JObject details = JObject.Parse(resp);
+                    var isRegistred = details["data"]["is_registered"].ToString(); //is_registered
+                    if (isRegistred == "true")
+                        result.success = true;
+                    else
+                        result.success = false;
+                    break;
+                default:
+                    result = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    break;
+            }
+
+            return result;
+        }
         public async Task<ErrorData> AuthByPassword(AuthData auth)
         {
             ErrorData result = new ErrorData();

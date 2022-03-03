@@ -33,7 +33,10 @@ namespace RGBTelegram
             services.AddDbContext<DataContext>(opt =>
                opt.UseNpgsql(_configuration.GetConnectionString("Db")), ServiceLifetime.Singleton);
             services.AddSingleton<TelegramBot>();
+            services.AddSingleton<AsuBot>();
+            services.AddSingleton<PialaBot>();
             services.AddSingleton<ICommandExecutor, CommandExecutor>();
+            services.AddSingleton<IUZCommExecutor, UZCommExecutor>();
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<ISessionService, SessionService>();
             services.AddSingleton<IAuthService, AuthService>();
@@ -42,6 +45,8 @@ namespace RGBTelegram
             services.AddSingleton<ILanguageText, LanguageText>();
             services.AddSingleton<BaseCommand, MessageCommands>();
             services.AddSingleton<BaseCommand, CallbackCommands>();
+            services.AddSingleton<UZBaseCommand, UZMessageCommands>();
+            services.AddSingleton<UZBaseCommand, UZCallbackCommands>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,6 +57,8 @@ namespace RGBTelegram
                 app.UseDeveloperExceptionPage();
             }
             serviceProvider.GetRequiredService<TelegramBot>().GetBot().Wait();
+            serviceProvider.GetRequiredService<AsuBot>().GetASUBot().Wait();
+            serviceProvider.GetRequiredService<PialaBot>().GetPialaBot().Wait();
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
