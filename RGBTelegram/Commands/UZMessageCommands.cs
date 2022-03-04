@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RGBTelegram.Commands
@@ -35,8 +36,74 @@ namespace RGBTelegram.Commands
             //await _botClient.SendTextMessageAsync(ChatId, text);
             UZRegistration registration = new UZRegistration();
             StringBuilder resp = new StringBuilder();
+            var me = _botClient.GetMeAsync().Result.Username;
             switch (text)
             {
+                #region Registration
+                case "Регистрация":
+                case "Ro‘yxatdan o‘tish":
+                    ReplyKeyboardMarkup phone;
+                    if (text == "Регистрация")
+                    {
+                        resp.AppendLine("Для регистрации отправьте мне свой номер телефона с помощью кнопки «Поделиться телефоном»");
+                        phone = new ReplyKeyboardMarkup(new KeyboardButton("Поделиться телефоном") { Text = "Поделиться телефоном", RequestContact = true });
+                    }
+                    else
+                    {
+                        resp.AppendLine("Telefon raqamingizni “Telefonni ulashish” tugmasi yordamida yuboring");
+                        phone = new ReplyKeyboardMarkup(new KeyboardButton("Telefonni ulashish") { Text = "Telefonni ulashish", RequestContact = true });
+                    }
+                    phone.ResizeKeyboard = true;
+                    phone.OneTimeKeyboard = true;
+                    await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), replyMarkup: phone);
+                    await _sessionService.UZUpdate(session, UZOperType.register);
+                    break;
+                #endregion
+                #region "Правила акции"
+                case "Правила акции":
+                case "Aksiya Qoidalari":
+                    var terms = me == "Asu_promo_bot" ? await _service.TermsASU( session.language): await _service.TermsPiala(session.language);
+                    if (terms.success)
+                    {
+                        await _botClient.SendDocumentAsync(
+                          chatId: ChatId,
+                          document: new InputOnlineFile(new Uri(terms.Items.FirstOrDefault(x => x.id == 2).name)),
+                          caption: terms.Items.FirstOrDefault(x => x.id == 1).name
+                      );
+                        await _sessionService.UZUpdate(session, UZOperType.menu);
+                    }
+                    else
+                        await _botClient.SendTextMessageAsync(ChatId, terms.message);
+                    break;
+                #endregion
+                #region "Об Акции"
+                case "Об Акции":
+                case "Aksiya haqida":                    
+                    var about = me == "Asu_promo_bot" ? await _service.AboutASU(session.language) : await _service.AboutPiala(session.language);
+                    if (about.success)
+                    {
+                        await _botClient.SendTextMessageAsync(ChatId, about.message, ParseMode.Markdown, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
+                        await _sessionService.UZUpdate(session, UZOperType.menu);
+                    }
+                    else
+                    {
+                        await _botClient.SendTextMessageAsync(ChatId, about.message, parseMode: ParseMode.Markdown, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
+                    }
+
+                    break;
+                #endregion
+                #region "Список ЦВП"
+                case "Список ЦВП":
+                case "SBM ro‘yxati":
+                   
+                    break;
+                #endregion
+                #region "Вопросы и ответы"
+                case "Вопросы и ответы":
+                case "Savollar va javoblar":
+                    await _botClient.SendTextMessageAsync(ChatId, "Лёха, где файл?", replyMarkup: _languageText.GetLanguage(Country.UZB));
+                    break;
+                #endregion
                 case "/language":
                     await _sessionService.UZUpdate(session, UZOperType.language);
                     await _botClient.SendTextMessageAsync(ChatId, "Выберите язык:", ParseMode.Markdown, replyMarkup: _languageText.GetLanguage(Country.UZB));
@@ -63,7 +130,7 @@ namespace RGBTelegram.Commands
                                 var regions = await _service.GetRegions(3);
                                 if (regions.status == 200)
                                 {
-                                   // await _regService.UZUpdate(registration, ChatId, region_id: int.Parse(text));
+                                    // await _regService.UZUpdate(registration, ChatId, region_id: int.Parse(text));
                                     List<List<InlineKeyboardButton>> Buttons = new List<List<InlineKeyboardButton>>();
                                     regions.Items.ForEach(rr =>
                                     {
@@ -89,22 +156,9 @@ namespace RGBTelegram.Commands
                         {
                             case UZOperType.languageSet:
                                 var lan = text == "Русский" ? Language.Rus : Language.UZB;
-                                await _sessionService.UZUpdate(session, UZOperType.start, language: lan);
-                                ReplyKeyboardMarkup phone;
-                                if (lan == Language.Rus)
-                                {
-                                    resp.AppendLine("Для регистрации отправьте мне свой номер телефона с помощью кнопки «Поделиться телефоном»");
-                                    phone = new ReplyKeyboardMarkup(new KeyboardButton("Поделиться телефоном") { Text = "Поделиться телефоном", RequestContact = true });
-                                }
-                                else
-                                {
-                                    resp.AppendLine("Ro‘yxatdan o‘tish uchun «Telefonni ulashish» tugmasi orqali menga telefon raqamingizni yuboring");
-                                    phone = new ReplyKeyboardMarkup(new KeyboardButton("Telefonni ulashish") { Text = "Telefonni ulashish", RequestContact = true });
-                                }
-                                phone.ResizeKeyboard = true;
-                                phone.OneTimeKeyboard = true;
-                                await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), replyMarkup: phone);
-                                await _sessionService.UZUpdate(session, UZOperType.start);
+                                await _botClient.SendTextMessageAsync(ChatId, text == "Русский" ? "Что умеет этот бот? Регистрируйтесь и выигрывайте призы!" : "Bu bot nima qila oladi ? Ro‘yxatdan o‘ting va sovrinlarni yutib oling!");
+                                await _sessionService.UZUpdate(session, UZOperType.menu, language: lan);
+                                await _botClient.SendTextMessageAsync(ChatId, text == "Русский" ? "Главное меню" : "Asosiy menyu", replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, lan));
                                 break;
                             case UZOperType.language:
                                 var lanCh = text == "Русский" ? Language.Rus : Language.UZB;
@@ -153,7 +207,8 @@ namespace RGBTelegram.Commands
                                 await _botClient.SendTextMessageAsync(ChatId, resp.ToString());
                                 break;
                             case UZOperType.birthdate:
-                                try {
+                                try
+                                {
                                     await _regService.UZUpdate(registration, ChatId, birthdate: text);
                                     await _botClient.SendTextMessageAsync(ChatId, "что должно произойти при регистрации? ждем ответа от Бекайдара и Марата");
                                 }

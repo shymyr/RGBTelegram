@@ -142,7 +142,7 @@ namespace RGBTelegram.Commands
                         await _sessionService.Update(session, OperationType.ProRule);
                     }
                     else
-                        await _botClient.SendTextMessageAsync(683782447, terms.message);
+                        await _botClient.SendTextMessageAsync(ChatId, terms.message);
 
                     break;
                 #endregion

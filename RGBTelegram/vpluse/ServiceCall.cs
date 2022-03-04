@@ -414,7 +414,180 @@ namespace RGBTelegram.vpluse
             }
             return result;
         }
+        public async Task<Family> TermsASU(Language language)
+        {
+            Family result = new Family();
+            var Response = await CallServiceUZB(null, "v2/nauryzpromo/uzb/asu/terms", "GET");
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
 
+                    JObject details = JObject.Parse(resp);
+                    result.Items = new List<Item>();
+                    foreach (var item in details["data"].ToArray())
+                    {
+                        Item term = new Item();
+                        term.id = 1;
+                        Item file = new Item();
+                        file.id = 2;
+                        switch (language)
+                        {
+                            case Language.UZB:
+                                term.name = item["term"]["uz"].ToString();
+                                file.name = item["file"]["uz"].ToString();
+                                break;
+                            case Language.Rus:
+                                term.name = item["term"]["ru"].ToString();
+                                file.name = item["file"]["ru"].ToString();
+                                break;
+                        }
+                        result.Items.Add(term);
+                        result.Items.Add(file);
+                    }
+                    result.status = 200;
+                    result.success = true;
+                    break;
+                default:
+                    var err = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = err.data.First().message;
+                    break;
+            }
+            return result;
+        }
+        public async Task<Family> TermsPiala(Language language)
+        {
+            Family result = new Family();
+            var Response = await CallServiceUZB(null, "v2/nauryzpromo/uzb/asu/terms", "GET");
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+
+                    JObject details = JObject.Parse(resp);
+                    result.Items = new List<Item>();
+                    foreach (var item in details["data"].ToArray())
+                    {
+                        Item term = new Item();
+                        term.id = 1;
+                        Item file = new Item();
+                        file.id = 2;
+                        switch (language)
+                        {
+                            case Language.UZB:
+                                term.name = item["term"]["uz"].ToString();
+                                file.name = item["file"]["uz"].ToString();
+                                break;
+                            case Language.Rus:
+                                term.name = item["term"]["ru"].ToString();
+                                file.name = item["file"]["ru"].ToString();
+                                break;
+                        }
+                        result.Items.Add(term);
+                        result.Items.Add(file);
+                    }
+                    result.status = 200;
+                    result.success = true;
+                    break;
+                default:
+                    var err = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = err.data.First().message;
+                    break;
+            }
+            return result;
+        }
+        public async Task<Family> AboutASU(Language language)
+        {
+            Family result = new Family();
+            var Response = await CallServiceUZB(null, "v2/nauryzpromo/uzb/asu/about", "GET");
+            var resp = await Response.Content.ReadAsStringAsync();
+            StringBuilder builder = new StringBuilder();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    JObject details = JObject.Parse(resp);
+                    result.Items = new List<Item>();
+                    foreach (var item in details["data"].ToArray())
+                    {
+                        if (item["description"].ToString() != "{}")
+                        {
+                            Item item1 = new Item();
+                            item1.id = int.Parse(item["id"].ToString());
+                            switch (language)
+                            {
+                                case Language.UZB:
+                                    item1.name = item["description"]["uz"].ToString();
+                                    break;
+                                case Language.Rus:
+                                    item1.name = item["description"]["ru"].ToString();
+                                    break;
+                            }
+                            result.Items.Add(item1);
+                            builder.AppendLine(item1.name);
+                        }
+                    }
+                    result.status = 200;
+                    result.success = true;
+                    result.message = builder.ToString();
+                    break;
+                default:
+                    var err = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = err.data.First().message;
+                    break;
+            }
+
+            return result;
+        }
+        public async Task<Family> AboutPiala(Language language)
+        {
+            Family result = new Family();
+            var Response = await CallServiceUZB(null, "v2/nauryzpromo/uzb/piala/about", "GET");
+            var resp = await Response.Content.ReadAsStringAsync();
+            StringBuilder builder = new StringBuilder();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    JObject details = JObject.Parse(resp);
+                    result.Items = new List<Item>();
+                    foreach (var item in details["data"].ToArray())
+                    {
+                        if (item["description"].ToString() != "{}")
+                        {
+                            Item item1 = new Item();
+                            item1.id = int.Parse(item["id"].ToString());
+                            switch (language)
+                            {
+                                case Language.UZB:
+                                    item1.name = item["description"]["uz"].ToString();
+                                    break;
+                               case Language.Rus:
+                                    item1.name = item["description"]["ru"].ToString();
+                                    break;
+                            }
+                            result.Items.Add(item1);
+                            builder.AppendLine(item1.name);
+                        }
+                    }
+                    result.status = 200;
+                    result.success = true;
+                    result.message = builder.ToString();
+                    break;
+                default:
+                    var err = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = err.data.First().message;
+                    break;
+            }
+
+            return result;
+        }
         /// <summary>
         /// Получить описание акции
         /// </summary>

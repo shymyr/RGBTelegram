@@ -247,7 +247,33 @@ namespace RGBTelegram.Services
             }
             return result.ToString();
         }
-
+        public ReplyKeyboardMarkup GetUZKeyboard(UZOperType operation, Language language)
+        {
+            List<List<KeyboardButton>> Buttons = new List<List<KeyboardButton>>();
+            switch (operation)
+            {
+                case UZOperType.menu:
+                    switch (language)
+                    {
+                        case Language.Rus:
+                            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Регистрация") { Text = "Регистрация" } });
+                            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Об Акции") { Text = "Об Акции" } });
+                            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Правила акции") { Text = "Правила акции" } });
+                            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Список ЦВП") { Text = "Список ЦВП" } });
+                            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Вопросы и ответы") { Text = "Вопросы и ответы" } });
+                            break;
+                        case Language.UZB:
+                            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Ro‘yxatdan o‘tish") { Text = "Ro‘yxatdan o‘tish" } });//Регистрация
+                            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Aksiya haqida") { Text = "Aksiya haqida" } });
+                            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Aksiya Qoidalari") { Text = "Aksiya Qoidalari" } });
+                            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("SBM ro‘yxati") { Text = "SBM ro‘yxati" } });
+                            Buttons.Add(new List<KeyboardButton>() { new KeyboardButton("Savollar va javoblar") { Text = "Savollar va javoblar" } });
+                            break;
+                    }
+                    break;
+            }
+            return new ReplyKeyboardMarkup(Buttons);
+        }
         public ReplyKeyboardMarkup GetLanguage(Country country)
         {
             List<List<KeyboardButton>> Buttons = new List<List<KeyboardButton>>();
