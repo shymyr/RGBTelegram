@@ -29,5 +29,7 @@ namespace RGBTelegram.vpluse
         Task<Family> GetRegions(int countryId);
         Task<Family> GetCities(int regionId);
         Task<bool> CorrectIIN(string IIN);
+        Task<Family> CheckpointsAsu(Language language);
+        Task<Family> CheckpointsPiala(Language language);
     }
 }

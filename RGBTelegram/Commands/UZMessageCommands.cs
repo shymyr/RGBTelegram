@@ -62,7 +62,7 @@ namespace RGBTelegram.Commands
                 #region "Правила акции"
                 case "Правила акции":
                 case "Aksiya Qoidalari":
-                    var terms = me == "Asu_promo_bot" ? await _service.TermsASU( session.language): await _service.TermsPiala(session.language);
+                    var terms = me == "Asu_promo_bot" ? await _service.TermsASU(session.language) : await _service.TermsPiala(session.language);
                     if (terms.success)
                     {
                         await _botClient.SendDocumentAsync(
@@ -78,7 +78,7 @@ namespace RGBTelegram.Commands
                 #endregion
                 #region "Об Акции"
                 case "Об Акции":
-                case "Aksiya haqida":                    
+                case "Aksiya haqida":
                     var about = me == "Asu_promo_bot" ? await _service.AboutASU(session.language) : await _service.AboutPiala(session.language);
                     if (about.success)
                     {
@@ -95,7 +95,23 @@ namespace RGBTelegram.Commands
                 #region "Список ЦВП"
                 case "Список ЦВП":
                 case "SBM ro‘yxati":
-                   
+                    var checkpoint = me == "Asu_promo_bot" ? await _service.CheckpointsAsu(session.language) : await _service.CheckpointsPiala(session.language);
+                    if (checkpoint.success)
+                    {
+                        for (int i = 0; i < checkpoint.Items.Count; i += 2)
+                        {
+                            var mess = checkpoint.Items[i];
+                            await _botClient.SendTextMessageAsync(ChatId, mess.name);
+                            var coord = checkpoint.Items[i + 1];
+                            if (!string.IsNullOrEmpty(coord.name))
+                            {
+                                var langit = coord.name.Split(' ');
+                                await _botClient.SendLocationAsync(ChatId, double.Parse(langit.First()), double.Parse(langit.Last()));
+                            }
+                        }
+                    }
+                    else
+                        await _botClient.SendTextMessageAsync(ChatId, checkpoint.message);
                     break;
                 #endregion
                 #region "Вопросы и ответы"
@@ -106,7 +122,7 @@ namespace RGBTelegram.Commands
                     {
                         await _botClient.SendDocumentAsync(
                           chatId: ChatId,
-                          document: new InputOnlineFile(new Uri(faqs.Items.FirstOrDefault(x => x.id == 2).name)),
+                          document: new InputOnlineFile(new Uri(faqs.Items.FirstOrDefault().name)),
                           replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language)
                       );
                         //await _botClient.SendTextMessageAsync(ChatId, faqs.message,replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
