@@ -500,6 +500,96 @@ namespace RGBTelegram.vpluse
             }
             return result;
         }
+        public async Task<Family> FaqsAsu(Language language)
+        {
+            Family result = new Family();
+            var Response = await CallServiceUZB(null, "v2/nauryzpromo/uzb/asu/faqs", "GET");
+            var resp = await Response.Content.ReadAsStringAsync();
+            StringBuilder builder = new StringBuilder();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    JObject details = JObject.Parse(resp);
+                    result.Items = new List<Item>();
+                    foreach (var item in details["data"].ToArray())
+                    {
+                        Item question = new Item();
+                        question.id = int.Parse(item["id"].ToString());
+                        Item answer = new Item();
+                        answer.id = int.Parse(item["id"].ToString());
+                        switch (language)
+                        {
+                            case Language.UZB:
+                                question.name = item["question"]["uz"].ToString();
+                                answer.name = item["answer"]["uz"].ToString();
+                                break;
+                            case Language.Rus:
+                                question.name = item["question"]["ru"].ToString();
+                                answer.name = item["answer"]["ru"].ToString();
+                                break;
+                        }
+                        result.Items.Add(question);
+                        builder.AppendLine(question.name);
+                        //builder.AppendLine(answer.name);
+                    }
+                    result.status = 200;
+                    result.success = true;
+                    result.message = builder.ToString();
+                    break;
+                default:
+                    var err = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = err.data.First().message;
+                    break;
+            }
+            return result;
+        }
+        public async Task<Family> FaqsPiala(Language language)
+        {
+            Family result = new Family();
+            var Response = await CallServiceUZB(null, "v2/nauryzpromo/uzb/piala/faqs", "GET");
+            var resp = await Response.Content.ReadAsStringAsync();
+            StringBuilder builder = new StringBuilder();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    JObject details = JObject.Parse(resp);
+                    result.Items = new List<Item>();
+                    foreach (var item in details["data"].ToArray())
+                    {
+                        Item question = new Item();
+                        question.id = int.Parse(item["id"].ToString());
+                        Item answer = new Item();
+                        answer.id = int.Parse(item["id"].ToString());
+                        switch (language)
+                        {
+                            case Language.UZB:
+                                question.name = item["question"]["uz"].ToString();
+                                answer.name = item["answer"]["uz"].ToString();
+                                break;
+                            case Language.Rus:
+                                question.name = item["question"]["ru"].ToString();
+                                answer.name = item["answer"]["ru"].ToString();
+                                break;
+                        }
+                        result.Items.Add(question);
+                        builder.AppendLine(question.name);
+                        //builder.AppendLine(answer.name);
+                    }
+                    result.status = 200;
+                    result.success = true;
+                    result.message = builder.ToString();
+                    break;
+                default:
+                    var err = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    result.status = ((int)Response.StatusCode);
+                    result.success = false;
+                    result.message = err.data.First().message;
+                    break;
+            }
+            return result;
+        }
         public async Task<Family> AboutASU(Language language)
         {
             Family result = new Family();
@@ -566,7 +656,7 @@ namespace RGBTelegram.vpluse
                                 case Language.UZB:
                                     item1.name = item["description"]["uz"].ToString();
                                     break;
-                               case Language.Rus:
+                                case Language.Rus:
                                     item1.name = item["description"]["ru"].ToString();
                                     break;
                             }

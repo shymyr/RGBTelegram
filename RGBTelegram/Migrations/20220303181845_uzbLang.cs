@@ -13,13 +13,7 @@ namespace RGBTelegram.Migrations
                 nullable: false,
                 defaultValue: 0);
 
-            migrationBuilder.AlterColumn<string>(
-                name: "region_id",
-                table: "UZRegistrations",
-                type: "text",
-                nullable: true,
-                oldClrType: typeof(int),
-                oldType: "integer");
+          
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -28,15 +22,7 @@ namespace RGBTelegram.Migrations
                 name: "language",
                 table: "UZSessions");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "region_id",
-                table: "UZRegistrations",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0,
-                oldClrType: typeof(string),
-                oldType: "text",
-                oldNullable: true);
+           
         }
     }
 }

@@ -364,6 +364,10 @@ namespace RGBTelegram.Commands
                     {
                         switch (session.Type)
                         {
+                            case OperationType.auth:
+                            case OperationType.regTelNumber:
+                                await _botClient.SendTextMessageAsync(ChatId, "Нельзя отправить номер телефона в виде текста. Пожалуйста, воспользуйтесь с кнопкой!", replyMarkup: mainMenu);
+                                break;
                             case OperationType.country:
                                 var lan = text == "Қазақ тілі" ? Language.KAZ : (text == "Кыргызский" ? Language.KGZ : Language.Rus);
                                 await _sessionService.Update(session, OperationType.language, language: lan);
@@ -422,7 +426,7 @@ namespace RGBTelegram.Commands
                                     }
                                 }
                                 PromoCode promo = new PromoCode();
-                                promo.channel = 1;
+                                promo.channel = 17;
                                 promo.code = text;
                                 promo.phone = auth.phone;
                                 var promoResult = await _service.PromocodeActivation(promo, session.Token, session.language);
@@ -526,10 +530,10 @@ namespace RGBTelegram.Commands
                                 }
                                 #endregion
                                 break;
-                            case OperationType.regTelNumber:
-                                await _sessionService.Update(session, OperationType.regPass);
-                                await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.regPass, session.language), ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
-                                break;
+                            //case OperationType.regTelNumber:
+                            //    await _sessionService.Update(session, OperationType.regPass);
+                            //    await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.regPass, session.language), ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                            //    break;
                             case OperationType.regPass:
                                 var regions = await _service.GetRegions(((int)session.country));
                                 if (regions.status == 200)

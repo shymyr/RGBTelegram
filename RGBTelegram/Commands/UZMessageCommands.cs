@@ -101,7 +101,21 @@ namespace RGBTelegram.Commands
                 #region "Вопросы и ответы"
                 case "Вопросы и ответы":
                 case "Savollar va javoblar":
-                    await _botClient.SendTextMessageAsync(ChatId, "Лёха, где файл?", replyMarkup: _languageText.GetLanguage(Country.UZB));
+                    var faqs = me == "Asu_promo_bot" ? await _service.FaqsAsu(session.language) : await _service.FaqsPiala(session.language);
+                    if (faqs.success)
+                    {
+                        await _botClient.SendDocumentAsync(
+                          chatId: ChatId,
+                          document: new InputOnlineFile(new Uri(faqs.Items.FirstOrDefault(x => x.id == 2).name)),
+                          replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language)
+                      );
+                        //await _botClient.SendTextMessageAsync(ChatId, faqs.message,replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
+                        await _sessionService.UZUpdate(session, UZOperType.menu);
+                    }
+                    else
+                    {
+                        await _botClient.SendTextMessageAsync(ChatId, faqs.message, parseMode: ParseMode.Markdown, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
+                    }
                     break;
                 #endregion
                 case "/language":

@@ -21,6 +21,8 @@ namespace RGBTelegram.vpluse
         Task<Family> Terms(int countryId, Language language);
         Task<Family> TermsPiala(Language language);
         Task<Family> TermsASU(Language language);
+        Task<Family> FaqsAsu(Language language);
+        Task<Family> FaqsPiala(Language language);
         Task<Family> AboutASU(Language language);
         Task<Family> AboutPiala(Language language);
         Task<Family> About(int countryId, Language language);
