@@ -821,7 +821,7 @@ namespace RGBTelegram.vpluse
             Family result = new Family();
             var Response = await CallServiceUZB(null, "v2/nauryzpromo/uzb/asu/checkpoints", "GET");
             var resp = await Response.Content.ReadAsStringAsync();
-
+            StringBuilder builder = new StringBuilder();
             switch (Response.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
@@ -831,7 +831,7 @@ namespace RGBTelegram.vpluse
                     int k = 0;
                     foreach (var item in details["data"].ToArray())
                     {
-                        StringBuilder builder = new StringBuilder();
+                        builder.AppendLine();
                         builder.AppendLine(item["city"]["name"].ToString());
                         builder.AppendLine(language == Language.UZB ? item["name"]["uz"].ToString() : item["name"]["ru"].ToString());
                         builder.AppendLine(language == Language.UZB ? item["address"]["uz"].ToString() : item["address"]["ru"].ToString());
@@ -848,6 +848,7 @@ namespace RGBTelegram.vpluse
                     }
                     result.status = 200;
                     result.success = true;
+                    result.message = builder.ToString();
                     break;
                 default:
                     var err = JsonConvert.DeserializeObject<ErrorData>(resp);
@@ -863,33 +864,33 @@ namespace RGBTelegram.vpluse
             Family result = new Family();
             var Response = await CallServiceUZB(null, "v2/nauryzpromo/uzb/piala/checkpoints", "GET");
             var resp = await Response.Content.ReadAsStringAsync();
-
+            StringBuilder builder = new StringBuilder();
             switch (Response.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
 
                     JObject details = JObject.Parse(resp);
                     result.Items = new List<Item>();
-                    int k = 0;
                     foreach (var item in details["data"].ToArray())
                     {
-                        StringBuilder builder = new StringBuilder();
+                        builder.AppendLine();
                         builder.AppendLine(item["city"]["name"].ToString());
                         builder.AppendLine(language == Language.UZB ? item["name"]["uz"].ToString() : item["name"]["ru"].ToString());
                         builder.AppendLine(language == Language.UZB ? item["address"]["uz"].ToString() : item["address"]["ru"].ToString());
                         builder.AppendLine(language == Language.UZB ? item["working_hours"]["uz"].ToString() : item["address"]["ru"].ToString());
-                        k++;
-                        Item text = new Item();
-                        text.id = k;
-                        text.name = builder.ToString();
-                        Item coord = new Item();
-                        coord.id = k + 1;
-                        coord.name = item["coordinates"].ToString();
-                        result.Items.Add(text);
-                        result.Items.Add(coord);
+                        //k++;
+                        //Item text = new Item();
+                        //text.id = k;
+                        //text.name = builder.ToString();
+                        //Item coord = new Item();
+                        //coord.id = k + 1;
+                        //coord.name = item["coordinates"].ToString();
+                        //result.Items.Add(text);
+                        //result.Items.Add(coord);
                     }
                     result.status = 200;
                     result.success = true;
+                    result.message = builder.ToString();
                     break;
                 default:
                     var err = JsonConvert.DeserializeObject<ErrorData>(resp);
