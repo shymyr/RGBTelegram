@@ -106,7 +106,7 @@ namespace RGBTelegram.Commands
                             if (!string.IsNullOrEmpty(coord.name))
                             {
                                 var langit = coord.name.Split(' ');
-                                await _botClient.SendLocationAsync(ChatId, double.Parse(langit.First()), double.Parse(langit.Last()));
+                                await _botClient.SendLocationAsync(ChatId, double.Parse(langit.First().Remove(langit.First().Length - 1)), double.Parse(langit.Last()));
                             }
                         }
                     }
