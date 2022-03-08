@@ -12,5 +12,7 @@ namespace RGBTelegram.Services
         Task<AuthData> GetOrCreate(long ChatId,string phone = null);
 
         Task<AuthData> Update(AuthData auth, string phone = null, string passwod = null);
+        Task<Token> GetOrCreateToken();
+        Task<Token> UpdateToken(Token auth, string token);
     }
 }

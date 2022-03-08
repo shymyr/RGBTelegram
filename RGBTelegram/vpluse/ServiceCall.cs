@@ -835,7 +835,7 @@ namespace RGBTelegram.vpluse
                         builder.AppendLine(item["city"]["name"].ToString());
                         builder.AppendLine(language == Language.UZB ? item["name"]["uz"].ToString() : item["name"]["ru"].ToString());
                         builder.AppendLine(language == Language.UZB ? item["address"]["uz"].ToString() : item["address"]["ru"].ToString());
-                        builder.AppendLine(language == Language.UZB ? item["working_hours"]["uz"].ToString() : item["address"]["ru"].ToString());
+                        builder.AppendLine(language == Language.UZB ? item["working_hours"]["uz"].ToString() : item["working_hours"]["ru"].ToString());
                         k++;
                         Item text = new Item();
                         text.id = k;
@@ -877,7 +877,7 @@ namespace RGBTelegram.vpluse
                         builder.AppendLine(item["city"]["name"].ToString());
                         builder.AppendLine(language == Language.UZB ? item["name"]["uz"].ToString() : item["name"]["ru"].ToString());
                         builder.AppendLine(language == Language.UZB ? item["address"]["uz"].ToString() : item["address"]["ru"].ToString());
-                        builder.AppendLine(language == Language.UZB ? item["working_hours"]["uz"].ToString() : item["address"]["ru"].ToString());
+                        builder.AppendLine(language == Language.UZB ? item["working_hours"]["uz"].ToString() : item["working_hours"]["ru"].ToString());
                         //k++;
                         //Item text = new Item();
                         //text.id = k;
@@ -902,6 +902,124 @@ namespace RGBTelegram.vpluse
             return result;
         }
 
+        public async Task<HttpResponseMessage> CallService(StringContent content, string action, string methodType, string token = null)
+        {
+            string apiBaseUrl = "https://staging-gateway.vpluse.me/";
+            string endpoint = apiBaseUrl + action;
+            HttpResponseMessage Response = new HttpResponseMessage();
+            using (HttpClient client = new HttpClient())
+            {
+                switch (methodType)
+                {
+                    case "POST":
+                        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                        Response = await client.PostAsync(endpoint, content);
+                        break;
+                    case "GET":
+                        Response = await client.GetAsync(endpoint);
+                        break;
+                    case "PUT":
+                        Response = await client.PutAsync(endpoint, content);
+                        break;
+                    case "DELETE":
+                        Response = await client.DeleteAsync(endpoint);
+                        break;
+                }
+            }
+            return Response;
+        }
+        public async Task<string> GetToken(bool testConnect)
+        {
+            string token = string.Empty;
+            HttpResponseMessage Response = new HttpResponseMessage();
+            using (var httpClient = new HttpClient())
+            {
+                var BaseAddress = new Uri(testConnect ? "https://staging-identity.vpluse.me/" : "https://identity.vpluse.me/");
+                var content = new FormUrlEncodedContent(new[]
+                {
+                new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                new KeyValuePair<string, string>("client_id", "vpluse.pepsipromo2021.api.client"),
+                new KeyValuePair<string, string>("client_secret", "4mgEr7AYWuBctZ78PqQafTnd"),
+                new KeyValuePair<string, string>("scope","gateway.api")
+            });
+
+                Response = await httpClient.PostAsync(BaseAddress + "connect/token", content);
+                var resp = await Response.Content.ReadAsStringAsync();
+                switch (Response.StatusCode)
+                {
+                    case System.Net.HttpStatusCode.OK:
+                        JObject details = JObject.Parse(resp);
+                        token = details["access_token"].ToString();
+                        break;
+                }
+            }
+            return token;
+        }
+        public async Task<ErrorData> RegUZ(UZRegistration reg, string token, bool Piala)
+        {
+            ErrorData result = new ErrorData();
+            StringContent content = new StringContent(JsonConvert.SerializeObject(reg), Encoding.UTF8, "application/json");
+            var Response = await CallService(content, "v2/nauryzpromo/uzb/registration/no-password", "POST", token);
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    result = Piala ? await regPiala(reg.phone, token) : await regAsu(reg.phone, token);
+                    break;
+                default:
+                    result = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    break;
+            }
+
+            return result;
+        }
+        public async Task<ErrorData> regPiala(string phone, string token)
+        {
+            Confirm confirm = new Confirm();
+            confirm.phone = phone;
+            ErrorData result = new ErrorData();
+            StringContent content = new StringContent(JsonConvert.SerializeObject(confirm), Encoding.UTF8, "application/json");
+            var Response = await CallService(content, $"v2/nauryzpromo/uzb/registration/{confirm.phone}/product/piala", "POST", token);
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    result.status = 200;
+                    result.success = true;
+                    break;
+                default:
+                    result = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    break;
+            }
+
+            return result;
+        }
+        public async Task<ErrorData> regAsu(string phone, string token)
+        {
+            Confirm confirm = new Confirm();
+            confirm.phone = phone;
+            ErrorData result = new ErrorData();
+            StringContent content = new StringContent(JsonConvert.SerializeObject(confirm), Encoding.UTF8, "application/json");
+            var Response = await CallService(content, $"v2/nauryzpromo/uzb/registration/{confirm.phone}/product/asu", "POST", token);
+            var resp = await Response.Content.ReadAsStringAsync();
+            switch (Response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    result.status = 200;
+                    result.success = true;
+                    break;
+                default:
+                    result = JsonConvert.DeserializeObject<ErrorData>(resp);
+                    break;
+            }
+
+            return result;
+        }
+
+        public class Confirm
+        {
+            public string phone { get; set; }
+        }
         public class Phone
         {
             public string phone { get; set; }

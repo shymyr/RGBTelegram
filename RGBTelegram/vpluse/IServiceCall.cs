@@ -31,5 +31,9 @@ namespace RGBTelegram.vpluse
         Task<bool> CorrectIIN(string IIN);
         Task<Family> CheckpointsAsu(Language language);
         Task<Family> CheckpointsPiala(Language language);
+        Task<string> GetToken(bool testConnect);
+        Task<ErrorData> RegUZ(UZRegistration reg, string token, bool Piala);
+        Task<ErrorData> regPiala(string phone, string token);
+        Task<ErrorData> regAsu(string phone, string token);
     }
 }

@@ -17,5 +17,6 @@ namespace RGBTelegram
         public DbSet<UZUser> UZUsers { get; set; }
         public DbSet<UZSession> UZSessions { get; set; }
         public DbSet<UZRegistration> UZRegistrations { get; set; }
+        public DbSet<Token> UZAuthToken { get; set; }
     }
 }

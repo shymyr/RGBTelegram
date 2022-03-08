@@ -20,12 +20,14 @@ namespace RGBTelegram.Commands
         private readonly IServiceCall _service;
         private readonly IRegService _regService;
         private readonly ILanguageText _languageText;
-        public UZMessageCommands(ISessionService sessionService, IServiceCall service, IRegService regService, ILanguageText languageText)
+        private readonly IAuthService _authService;
+        public UZMessageCommands(ISessionService sessionService, IServiceCall service, IRegService regService, ILanguageText languageText,IAuthService authService)
         {
             _sessionService = sessionService;
             _service = service;
             _regService = regService;
             _languageText = languageText;
+            _authService = authService;
         }
         public override string Name => "message";
 
@@ -98,17 +100,7 @@ namespace RGBTelegram.Commands
                     var checkpoint = me == "Asu_promo_bot" ? await _service.CheckpointsAsu(session.language) : await _service.CheckpointsPiala(session.language);
                     if (checkpoint.success)
                     {
-                        for (int i = 0; i < checkpoint.Items.Count; i += 2)
-                        {
-                            var mess = checkpoint.Items[i];
-                            await _botClient.SendTextMessageAsync(ChatId, mess.name);
-                            var coord = checkpoint.Items[i + 1];
-                            if (!string.IsNullOrEmpty(coord.name))
-                            {
-                                var langit = coord.name.Split(' ');
-                                await _botClient.SendLocationAsync(ChatId, double.Parse(langit.First().Remove(langit.First().Length - 1)), double.Parse(langit.Last()));
-                            }
-                        }
+                        await _botClient.SendTextMessageAsync(ChatId, checkpoint.message, ParseMode.Markdown, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
                     }
                     else
                         await _botClient.SendTextMessageAsync(ChatId, checkpoint.message);
@@ -239,8 +231,19 @@ namespace RGBTelegram.Commands
                             case UZOperType.birthdate:
                                 try
                                 {
-                                    await _regService.UZUpdate(registration, ChatId, birthdate: text);
-                                    await _botClient.SendTextMessageAsync(ChatId, "что должно произойти при регистрации? ждем ответа от Бекайдара и Марата");
+                                    string msg = string.Empty;
+                                    if (session.language == Language.Rus)
+                                        msg = "Поздравляем! Мы рады, что вы с нами. Пройдите в ближайший Центр Выдачи Призов и получите подарочную Асу, а также примите участие в моментальном розыгрыше призов от бренда.";
+                                    else
+                                        msg = @"Tabriklaymiz! Siz biz bilan bo‘lganligingizdan xursandmiz.Sizga yaqin joylashgan Sovrinlar berish markaziga tashrif buyuring va sovg‘a ASUni oling, shuningdek brenddan bir lahzali sovrinlar o‘yinida ishtirok eting.";
+
+                                   await _regService.UZUpdate(registration, ChatId, birthdate: text);
+                                    var token = await _authService.GetOrCreateToken();
+                                    var reg = await _service.RegUZ(registration, token.AuthToken, me == "Asu_promo_bot" ? false : true);
+                                    if (reg.success)
+                                        await _botClient.SendTextMessageAsync(ChatId, msg, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
+                                    else
+                                        await _botClient.SendTextMessageAsync(ChatId, reg.data.FirstOrDefault().message, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
                                 }
                                 catch
                                 {
