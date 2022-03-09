@@ -60,7 +60,7 @@ namespace RGBTelegram.Services
             string newToken = string.Empty;
             if (Auth != null)
             {
-                if (Auth.Expired > DateTime.Now.AddSeconds(10))
+                if (Auth.Expired < DateTime.Now.AddSeconds(10))
                 {
                     newToken = await _service.GetToken(true);
                     await UpdateToken(Auth, newToken);

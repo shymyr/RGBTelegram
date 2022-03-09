@@ -92,10 +92,10 @@ namespace RGBTelegram.vpluse
             return Response;
         }
 
-        public async Task<ErrorData> UZCheckRegistration(string phone)
+        public async Task<ErrorData> UZCheckRegistration(string phone, string token)
         {
             ErrorData result = new ErrorData();
-            var Response = await CallServiceUZB(null, $"v2/nauryzpromo/uzb/check-registration/{phone}", "GET");
+            var Response = await CallService(null, $"v2/nauryzpromo/uzb/check-registration/{phone}", "GET",token);
             var resp = await Response.Content.ReadAsStringAsync();
             switch (Response.StatusCode)
             {
@@ -909,10 +909,10 @@ namespace RGBTelegram.vpluse
             HttpResponseMessage Response = new HttpResponseMessage();
             using (HttpClient client = new HttpClient())
             {
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
                 switch (methodType)
                 {
                     case "POST":
-                        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
                         Response = await client.PostAsync(endpoint, content);
                         break;
                     case "GET":

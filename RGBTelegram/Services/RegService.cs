@@ -95,7 +95,7 @@ namespace RGBTelegram.Services
                 registration.middle_name = middle_name;
             if (!string.IsNullOrEmpty(birthdate))
             {
-                registration.birthdate = DateTime.Parse(birthdate).ToShortDateString();
+                registration.birthdate = DateTime.Parse(birthdate).ToUniversalTime().ToString("s"); 
             }
 
             _context.UZRegistrations.Update(registration);

@@ -138,7 +138,8 @@ namespace RGBTelegram.Commands
                     if (update.Message.Contact != null)
                     {
                         var uzPhone = update.Message.Contact.PhoneNumber.Replace("+", "");
-                        var check = await _service.UZCheckRegistration(uzPhone);
+                        var tokenContact = await _authService.GetOrCreateToken();
+                        var check = await _service.UZCheckRegistration(uzPhone, tokenContact.AuthToken);
                         if (check.status == 200)
                         {
                             if (check.success)
