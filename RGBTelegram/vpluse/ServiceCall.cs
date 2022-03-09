@@ -40,7 +40,7 @@ namespace RGBTelegram.vpluse
         }
         public async Task<HttpResponseMessage> CallServiceUZB(StringContent content, string action, string methodType)
         {
-            string apiBaseUrl = "https://staging-gateway.vpluse.me/";
+            string apiBaseUrl = "https://gateway.vpluse.me/";
             string endpoint = apiBaseUrl + action;
             HttpResponseMessage Response = new HttpResponseMessage();
             using (HttpClient client = new HttpClient())
@@ -828,14 +828,23 @@ namespace RGBTelegram.vpluse
 
                     JObject details = JObject.Parse(resp);
                     result.Items = new List<Item>();
+                    var items = details["data"]["title"].ToString();
+
+                    JObject titles = JObject.Parse(items.ToString());
+                    var title = language == Language.UZB ? titles["uz"].ToString() : titles["ru"].ToString();
+                    builder.AppendLine(title);
                     int k = 0;
-                    foreach (var item in details["data"].ToArray())
+                    foreach (var item in details["data"]["checkpoints"].ToArray())
                     {
                         builder.AppendLine();
-                        builder.AppendLine(item["city"]["name"].ToString());
-                        builder.AppendLine(language == Language.UZB ? item["name"]["uz"].ToString() : item["name"]["ru"].ToString());
-                        builder.AppendLine(language == Language.UZB ? item["address"]["uz"].ToString() : item["address"]["ru"].ToString());
-                        builder.AppendLine(language == Language.UZB ? item["working_hours"]["uz"].ToString() : item["working_hours"]["ru"].ToString());
+                        if (item["city"].ToString() != "{}")
+                            builder.AppendLine(item["city"]["name"].ToString());
+                        if (item["name"].ToString() != "{}")
+                            builder.AppendLine(language == Language.UZB ? item["name"]["uz"].ToString() : item["name"]["ru"].ToString());
+                        if (item["address"].ToString() != "{}")
+                            builder.AppendLine(language == Language.UZB ? item["address"]["uz"].ToString() : item["address"]["ru"].ToString());
+                        if (item["working_hours"].ToString() != "{}")
+                            builder.AppendLine(language == Language.UZB ? item["working_hours"]["uz"].ToString() : item["working_hours"]["ru"].ToString());
                         k++;
                         Item text = new Item();
                         text.id = k;
@@ -871,22 +880,32 @@ namespace RGBTelegram.vpluse
 
                     JObject details = JObject.Parse(resp);
                     result.Items = new List<Item>();
-                    foreach (var item in details["data"].ToArray())
+                    var items = details["data"]["title"].ToString();
+
+                    JObject titles = JObject.Parse(items.ToString());
+                    var title = language == Language.UZB ? titles["uz"].ToString() : titles["ru"].ToString();
+                    builder.AppendLine(title);
+                    int k = 0;
+                    foreach (var item in details["data"]["checkpoints"].ToArray())
                     {
                         builder.AppendLine();
-                        builder.AppendLine(item["city"]["name"].ToString());
-                        builder.AppendLine(language == Language.UZB ? item["name"]["uz"].ToString() : item["name"]["ru"].ToString());
-                        builder.AppendLine(language == Language.UZB ? item["address"]["uz"].ToString() : item["address"]["ru"].ToString());
-                        builder.AppendLine(language == Language.UZB ? item["working_hours"]["uz"].ToString() : item["working_hours"]["ru"].ToString());
-                        //k++;
-                        //Item text = new Item();
-                        //text.id = k;
-                        //text.name = builder.ToString();
-                        //Item coord = new Item();
-                        //coord.id = k + 1;
-                        //coord.name = item["coordinates"].ToString();
-                        //result.Items.Add(text);
-                        //result.Items.Add(coord);
+                        if (item["city"].ToString() != "{}")
+                            builder.AppendLine(item["city"]["name"].ToString());
+                        if (item["name"].ToString() != "{}")
+                            builder.AppendLine(language == Language.UZB ? item["name"]["uz"].ToString() : item["name"]["ru"].ToString());
+                        if (item["address"].ToString() != "{}")
+                            builder.AppendLine(language == Language.UZB ? item["address"]["uz"].ToString() : item["address"]["ru"].ToString());
+                        if (item["working_hours"].ToString() != "{}")
+                            builder.AppendLine(language == Language.UZB ? item["working_hours"]["uz"].ToString() : item["working_hours"]["ru"].ToString());
+                        k++;
+                        Item text = new Item();
+                        text.id = k;
+                        text.name = builder.ToString();
+                        Item coord = new Item();
+                        coord.id = k + 1;
+                        coord.name = item["coordinates"].ToString();
+                        result.Items.Add(text);
+                        result.Items.Add(coord);
                     }
                     result.status = 200;
                     result.success = true;
@@ -904,7 +923,7 @@ namespace RGBTelegram.vpluse
 
         public async Task<HttpResponseMessage> CallService(StringContent content, string action, string methodType, string token = null)
         {
-            string apiBaseUrl = "https://staging-gateway.vpluse.me/";
+            string apiBaseUrl = "https://gateway.vpluse.me/";
             string endpoint = apiBaseUrl + action;
             HttpResponseMessage Response = new HttpResponseMessage();
             using (HttpClient client = new HttpClient())
@@ -934,7 +953,7 @@ namespace RGBTelegram.vpluse
             HttpResponseMessage Response = new HttpResponseMessage();
             using (var httpClient = new HttpClient())
             {
-                var BaseAddress = new Uri(testConnect ? "https://staging-identity.vpluse.me/" : "https://identity.vpluse.me/");
+                var BaseAddress = new Uri(testConnect ? "https://identity.vpluse.me/" : "https://identity.vpluse.me/");
                 var content = new FormUrlEncodedContent(new[]
                 {
                 new KeyValuePair<string, string>("grant_type", "client_credentials"),

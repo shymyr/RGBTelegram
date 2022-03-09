@@ -187,7 +187,7 @@ namespace RGBTelegram.Commands
                                 var lanCh = text == "Русский" ? Language.Rus : Language.UZB;
                                 await _sessionService.UZUpdate(session, UZOperType.start, language: lanCh);
                                 resp.AppendLine(await _languageText.GetTextFromUZ(UZOperType.language, lanCh));
-                                await _botClient.SendTextMessageAsync(ChatId, resp.ToString());
+                                await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, lanCh));
                                 break;
                             case UZOperType.phone:
                                 var regions = await _service.GetRegions(3);
