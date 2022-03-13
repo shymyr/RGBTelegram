@@ -221,7 +221,7 @@ namespace RGBTelegram.Commands
                                                 new[]{ new InlineKeyboardButton(session.language== Language.Rus? "Пропустить": "Oʻtkazib yuborish")
                                                 { Text = session.language == Language.Rus ? "Пропустить" : "Oʻtkazib yuborish", CallbackData = "Skip" } }
                                             });
-                                await _botClient.SendTextMessageAsync(ChatId, session.language == Language.Rus ? "Укажите отчество(При наличий):" : "Iltimos, otasining ismini kiriting(agar mavjud bo'lsa):", ParseMode.Markdown, replyMarkup: skip);
+                                await _botClient.SendTextMessageAsync(ChatId, session.language == Language.Rus ? "Укажите отчество(При наличии):" : "Iltimos, otasining ismini kiriting(agar mavjud bo'lsa):", ParseMode.Markdown, replyMarkup: skip);
                                 break;
                             case UZOperType.middle_name:
                                 await _regService.UZUpdate(registration, ChatId, middle_name: text);
@@ -233,12 +233,21 @@ namespace RGBTelegram.Commands
                                 try
                                 {
                                     string msg = string.Empty;
-                                    if (session.language == Language.Rus)
-                                        msg = "Поздравляем! Мы рады, что вы с нами. Пройдите в ближайший Центр Выдачи Призов и получите подарочную Асу, а также примите участие в моментальном розыгрыше призов от бренда.";
+                                    if (me == "Asu_promo_bot")
+                                    {
+                                        if (session.language == Language.Rus)
+                                            msg = "Поздравляем! Мы рады, что вы с нами. Пройдите в ближайший Центр Выдачи Призов и получите подарочную Асу, а также примите участие в моментальном розыгрыше призов от бренда.";
+                                        else
+                                            msg = @"Tabriklaymiz! Siz biz bilan bo‘lganligingizdan xursandmiz.Sizga yaqin joylashgan Sovrinlar berish markaziga tashrif buyuring va sovg‘a ASUni oling, shuningdek brenddan bir lahzali sovrinlar o‘yinida ishtirok eting.";
+                                    }
                                     else
-                                        msg = @"Tabriklaymiz! Siz biz bilan bo‘lganligingizdan xursandmiz.Sizga yaqin joylashgan Sovrinlar berish markaziga tashrif buyuring va sovg‘a ASUni oling, shuningdek brenddan bir lahzali sovrinlar o‘yinida ishtirok eting.";
-
-                                   await _regService.UZUpdate(registration, ChatId, birthdate: text);
+                                    {
+                                        if (session.language == Language.Rus)
+                                            msg = "Поздравляем! Мы рады что вы с нами. Пройдите в ближайший центр выдачи призов и получите подарочный чай Пиала, а также примите участие в моментальном розыгрыше призов от бренда.";
+                                        else
+                                            msg = "Tabriklaymiz! Biz bilan ekanligingizdan xursandmiz. Eng yaqin sovrinlar markaziga boring va Piala sovg sovg‘ali choyni oling, shuningdek, brendning bir lahzali sovrinlar oo‘yinida ishtirok eting.";
+                                    }
+                                    await _regService.UZUpdate(registration, ChatId, birthdate: text);
                                     var token = await _authService.GetOrCreateToken();
                                     var reg = await _service.RegUZ(registration, token.AuthToken, me == "Asu_promo_bot" ? false : true);
                                     if (reg.success)
