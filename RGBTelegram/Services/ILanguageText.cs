@@ -11,7 +11,7 @@ namespace RGBTelegram.Services
     {
         Task<string> GetTextFromUZ(UZOperType operation, Language language);
         Task<string> GetTextFromLanguage(OperationType operation, Language language);
-        ReplyKeyboardMarkup GetUZKeyboard(UZOperType operation, Language language);
+        ReplyKeyboardMarkup GetUZKeyboard(UZOperType operation, Language language, bool Piala);
         ReplyKeyboardMarkup GetKeyboard(UserSession session);
         ReplyKeyboardMarkup GetLanguage(Country country);
         ReplyKeyboardMarkup GetMainMenu(Language language, bool Authorized);

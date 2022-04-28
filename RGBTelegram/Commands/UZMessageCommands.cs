@@ -84,12 +84,12 @@ namespace RGBTelegram.Commands
                     var about = me == "Asu_promo_bot" ? await _service.AboutASU(session.language) : await _service.AboutPiala(session.language);
                     if (about.success)
                     {
-                        await _botClient.SendTextMessageAsync(ChatId, about.message, ParseMode.Markdown, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
+                        await _botClient.SendTextMessageAsync(ChatId, about.message, ParseMode.Markdown, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language, me == "Asu_promo_bot" ? false : true));
                         await _sessionService.UZUpdate(session, UZOperType.menu);
                     }
                     else
                     {
-                        await _botClient.SendTextMessageAsync(ChatId, about.message, parseMode: ParseMode.Markdown, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
+                        await _botClient.SendTextMessageAsync(ChatId, about.message, parseMode: ParseMode.Markdown, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language, me == "Asu_promo_bot" ? false : true));
                     }
 
                     break;
@@ -100,7 +100,7 @@ namespace RGBTelegram.Commands
                     var checkpoint = me == "Asu_promo_bot" ? await _service.CheckpointsAsu(session.language) : await _service.CheckpointsPiala(session.language);
                     if (checkpoint.success)
                     {
-                        await _botClient.SendTextMessageAsync(ChatId, checkpoint.message, ParseMode.Markdown, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
+                        await _botClient.SendTextMessageAsync(ChatId, checkpoint.message, ParseMode.Markdown, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language, me == "Asu_promo_bot" ? false : true));
                     }
                     else
                         await _botClient.SendTextMessageAsync(ChatId, checkpoint.message);
@@ -115,14 +115,14 @@ namespace RGBTelegram.Commands
                         await _botClient.SendDocumentAsync(
                           chatId: ChatId,
                           document: new InputOnlineFile(new Uri(faqs.Items.FirstOrDefault().name)),
-                          replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language)
+                          replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language, me == "Asu_promo_bot" ? false : true)
                       );
                         //await _botClient.SendTextMessageAsync(ChatId, faqs.message,replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
                         await _sessionService.UZUpdate(session, UZOperType.menu);
                     }
                     else
                     {
-                        await _botClient.SendTextMessageAsync(ChatId, faqs.message, parseMode: ParseMode.Markdown, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
+                        await _botClient.SendTextMessageAsync(ChatId, faqs.message, parseMode: ParseMode.Markdown, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language, me == "Asu_promo_bot" ? false : true));
                     }
                     break;
                 #endregion
@@ -181,13 +181,13 @@ namespace RGBTelegram.Commands
                                 var lan = text == "Русский" ? Language.Rus : Language.UZB;
                                 await _botClient.SendTextMessageAsync(ChatId, text == "Русский" ? "Что умеет этот бот? Регистрируйтесь и выигрывайте призы!" : "Bu bot nima qila oladi ? Ro‘yxatdan o‘ting va sovrinlarni yutib oling!");
                                 await _sessionService.UZUpdate(session, UZOperType.menu, language: lan);
-                                await _botClient.SendTextMessageAsync(ChatId, text == "Русский" ? "Главное меню" : "Asosiy menyu", replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, lan));
+                                await _botClient.SendTextMessageAsync(ChatId, text == "Русский" ? "Главное меню" : "Asosiy menyu", replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, lan, me == "Asu_promo_bot" ? false:true));
                                 break;
                             case UZOperType.language:
                                 var lanCh = text == "Русский" ? Language.Rus : Language.UZB;
                                 await _sessionService.UZUpdate(session, UZOperType.start, language: lanCh);
                                 resp.AppendLine(await _languageText.GetTextFromUZ(UZOperType.language, lanCh));
-                                await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, lanCh));
+                                await _botClient.SendTextMessageAsync(ChatId, resp.ToString(), replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, lanCh, me == "Asu_promo_bot" ? false : true));
                                 break;
                             case UZOperType.phone:
                                 var regions = await _service.GetRegions(3);
@@ -251,9 +251,9 @@ namespace RGBTelegram.Commands
                                     var token = await _authService.GetOrCreateToken();
                                     var reg = await _service.RegUZ(registration, token.AuthToken, me == "Asu_promo_bot" ? false : true);
                                     if (reg.success)
-                                        await _botClient.SendTextMessageAsync(ChatId, msg, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
+                                        await _botClient.SendTextMessageAsync(ChatId, msg, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language, me == "Asu_promo_bot" ? false : true));
                                     else
-                                        await _botClient.SendTextMessageAsync(ChatId, reg.data.FirstOrDefault().message, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language));
+                                        await _botClient.SendTextMessageAsync(ChatId, reg.data.FirstOrDefault().message, replyMarkup: _languageText.GetUZKeyboard(UZOperType.menu, session.language, me == "Asu_promo_bot" ? false : true));
                                 }
                                 catch
                                 {

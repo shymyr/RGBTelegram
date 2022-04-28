@@ -256,6 +256,7 @@ namespace RGBTelegram.Commands
                     }
                     break;
                 #endregion
+                #region Смена языка
                 case "/language":
                     if (!session.Authorized)
                     {
@@ -267,6 +268,8 @@ namespace RGBTelegram.Commands
                         await _botClient.SendTextMessageAsync(ChatId, "Выберите язык:", ParseMode.Markdown, replyMarkup: _languageText.GetLanguage(session.country));
                     }
                     break;
+                #endregion
+                #region Menu
                 case "/mainmenu":
                     if (session.country == 0 || session.language == 0)
                     {
@@ -289,6 +292,8 @@ namespace RGBTelegram.Commands
 
                     }
                     break;
+                #endregion
+                #region Start
                 case "/start":
                     #region Start
                     if (session.Authorized)
@@ -325,6 +330,8 @@ namespace RGBTelegram.Commands
                     }
                     #endregion
                     break;
+                #endregion
+                #region Default
                 default:
                     if (update.Message.Contact != null)
                     {
@@ -343,6 +350,10 @@ namespace RGBTelegram.Commands
                                 {
                                     if (!call.success)
                                     {
+                                        var datareg1 = await _authService.GetOrCreate(ChatId);
+                                        datareg1.phone = update.Message.Contact.PhoneNumber.Replace("+", "");
+                                        await _authService.Update(datareg1, phone: update.Message.Contact.PhoneNumber.Replace("+", ""));
+
                                         await _regService.GetOrCreate(ChatId, update.Message.Contact.PhoneNumber.Replace("+", ""));
                                         await _botClient.SendTextMessageAsync(ChatId, await _languageText.GetTextFromLanguage(OperationType.regPass, session.language), ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
                                         await _sessionService.Update(session, OperationType.regPass);
@@ -538,6 +549,10 @@ namespace RGBTelegram.Commands
                                 var regions = await _service.GetRegions(((int)session.country));
                                 if (regions.status == 200)
                                 {
+                                    var datareg = await _authService.GetOrCreate(ChatId);
+                                    datareg.password = text;
+                                    await _authService.Update(datareg, passwod: text);
+
                                     registration = await _regService.GetOrCreate(ChatId);
                                     await _regService.Update(registration, ChatId, password: text);
                                     List<List<InlineKeyboardButton>> Buttons1 = new List<List<InlineKeyboardButton>>();
@@ -604,6 +619,7 @@ namespace RGBTelegram.Commands
                         }
                     }
                     break;
+                #endregion
             }
 
             //await _botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, message, ParseMode.Markdown);
