@@ -980,15 +980,15 @@ namespace RGBTelegram.vpluse
             StringContent content = new StringContent(JsonConvert.SerializeObject(reg), Encoding.UTF8, "application/json");
             var Response = await CallService(content, "v2/nauryzpromo/uzb/registration/no-password", "POST", token);
             var resp = await Response.Content.ReadAsStringAsync();
-            switch (Response.StatusCode)
-            {
-                case System.Net.HttpStatusCode.OK:
+            //switch (Response.StatusCode)
+            //{
+            //    case System.Net.HttpStatusCode.OK:
                     result = Piala ? await regPiala(reg.phone, token) : await regAsu(reg.phone, token);
-                    break;
-                default:
-                    result = JsonConvert.DeserializeObject<ErrorData>(resp);
-                    break;
-            }
+            //        break;
+            //    default:
+            //        result = JsonConvert.DeserializeObject<ErrorData>(resp);
+            //        break;
+            //}
 
             return result;
         }

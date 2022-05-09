@@ -142,11 +142,11 @@ namespace RGBTelegram.Commands
                         var check = await _service.UZCheckRegistration(uzPhone, tokenContact.AuthToken);
                         if (check.status == 200)
                         {
-                            if (check.success)
-                            {
-                                await _botClient.SendTextMessageAsync(ChatId, "Вы уже регистрированы", replyMarkup: new ReplyKeyboardRemove());
-                            }
-                            else
+                            //if (check.success)
+                            //{
+                            //    await _botClient.SendTextMessageAsync(ChatId, "Вы уже регистрированы", replyMarkup: new ReplyKeyboardRemove());
+                            //}
+                            //else
                             {
                                 registration = await _regService.UZGetOrCreate(ChatId);
                                 await _regService.UZUpdate(registration, ChatId, phone: uzPhone);

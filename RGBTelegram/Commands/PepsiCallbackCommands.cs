@@ -12,16 +12,17 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
+
 namespace RGBTelegram.Commands
 {
-    public class CallbackCommands : BaseCommand
+    public class PepsiCallbackCommands : PepsiBaseCommand
     {
         private readonly TelegramBotClient _botClient;
         private readonly ISessionService _sessionService;
         private readonly IRegService _regService;
         private readonly IServiceCall _service;
         private readonly ILanguageText _languageText;
-        public CallbackCommands(ISessionService sessionService, IServiceCall service, IRegService regService, TelegramBot telegramBot, ILanguageText languageText)
+        public PepsiCallbackCommands(ISessionService sessionService, IServiceCall service, IRegService regService, TelegramBot telegramBot, ILanguageText languageText)
         {
             _sessionService = sessionService;
             _botClient = telegramBot.GetBot().Result;
@@ -44,7 +45,7 @@ namespace RGBTelegram.Commands
                 await _botClient.SendTextMessageAsync(update.Message.Chat.Id, resp.ToString(), ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
             }
             else
-            {                
+            {
                 var mainMenu = _languageText.GetKeyboard(session);
                 switch (text)
                 {

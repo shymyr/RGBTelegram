@@ -15,7 +15,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RGBTelegram.Commands
 {
-    public class MessageCommands : BaseCommand
+    public class PepsiMessageCommands: PepsiBaseCommand
     {
         private readonly TelegramBotClient _botClient;
         private readonly ISessionService _sessionService;
@@ -23,7 +23,7 @@ namespace RGBTelegram.Commands
         private readonly IServiceCall _service;
         private readonly IRegService _regService;
         private readonly ILanguageText _languageText;
-        public MessageCommands(ISessionService sessionService, IAuthService authService, IServiceCall service, IRegService regService, TelegramBot telegramBot, ILanguageText languageText)
+        public PepsiMessageCommands(ISessionService sessionService, IAuthService authService, IServiceCall service, IRegService regService, TelegramBot telegramBot, ILanguageText languageText)
         {
             _sessionService = sessionService;
             _authService = authService;
@@ -631,10 +631,8 @@ namespace RGBTelegram.Commands
                         #endregion
                 }
             }
-            
+
             //await _botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, message, ParseMode.Markdown);
         }
-
-
     }
 }
