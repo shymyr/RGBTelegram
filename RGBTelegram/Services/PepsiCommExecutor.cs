@@ -11,21 +11,21 @@ using Telegram.Bot.Types.Enums;
 
 namespace RGBTelegram.Services
 {
-    public class PepsiCommExecutor:IPepsiCommExecutor
+    public class PepsiCommExecutor : IPepsiCommExecutor
     {
         private readonly ISessionService _sessionService;
         private readonly List<PepsiBaseCommand> _commands;
         private readonly TelegramBotClient _botClient;
         private PepsiBaseCommand _lastCommand;
-        public PepsiCommExecutor(ISessionService sessionService, TelegramBot telegramBot, IServiceProvider serviceProvider)
+        public PepsiCommExecutor(ISessionService sessionService, PepsiBot telegramBot, IServiceProvider serviceProvider)
         {
             _sessionService = sessionService;
-            _botClient = telegramBot.GetBot().Result;
+            _botClient = telegramBot.GetPepsiBot().Result;
             _commands = serviceProvider.GetServices<PepsiBaseCommand>().ToList();
         }
         public async Task Execute(Update update)
         {
-            var session = await _sessionService.GetOrCreate(update);
+            var session = await _sessionService.PepsiGetOrCreate(update);
             if (update?.Message?.Chat == null && update?.CallbackQuery == null)
                 return;
             switch (update.Type)
@@ -39,7 +39,7 @@ namespace RGBTelegram.Services
             }
         }
 
-        private async Task ExecuteCommand(string commandName, Update update, UserSession session)
+        private async Task ExecuteCommand(string commandName, Update update, PepsiSession session)
         {
             _lastCommand = _commands.First(x => x.Name == commandName);
             await _lastCommand.ExecuteAsync(update, session);

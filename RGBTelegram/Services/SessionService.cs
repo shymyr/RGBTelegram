@@ -48,6 +48,36 @@ namespace RGBTelegram.Services
             await _context.SaveChangesAsync();
             return newSession;
         }
+        public async Task<PepsiSession> PepsiGetOrCreate(Update update)
+        {
+            var user = await _userService.PepsiGetOrCreate(update);
+            var sesion = await _context.PepsiSessions.FirstOrDefaultAsync(x => x.User == user);
+            if (sesion != null)
+            {
+                //sesion.dateTime = DateTime.UtcNow;
+                //_context.UserSessions.Update(sesion);
+                //await _context.SaveChangesAsync();
+                return sesion;
+            }
+
+            var newSession = update.Type switch
+            {
+                UpdateType.CallbackQuery => new PepsiSession
+                {
+                    User = user,
+                    UserId = update.CallbackQuery.Message.Chat.Id
+                },
+                UpdateType.Message => new PepsiSession
+                {
+                    User = user,
+                    UserId = update.Message.Chat.Id,
+                    dateTime = DateTime.UtcNow
+                }
+            };
+            await _context.PepsiSessions.AddAsync(newSession);
+            await _context.SaveChangesAsync();
+            return newSession;
+        }
         public async Task<UZSession> UZGetOrCreate(Update update)
         {
             var user = await _userService.GetUZUser(update);
@@ -80,6 +110,11 @@ namespace RGBTelegram.Services
             _context.UserSessions.Remove(session);
             await _context.SaveChangesAsync();
         }
+        public async Task PepsiDelete(PepsiSession session)
+        {
+            _context.PepsiSessions.Remove(session);
+            await _context.SaveChangesAsync();
+        }
         public async Task UZDelete(UZSession session)
         {
             _context.UZSessions.Remove(session);
@@ -102,6 +137,24 @@ namespace RGBTelegram.Services
             _context.UserSessions.Update(session);
             await _context.SaveChangesAsync();
         }
+        public async Task PepsiUpdate(PepsiSession session, OperationType operation, string token = null, bool? authorised = null, Country? country = null, Language? language = null, double? expire = null)
+        {
+            session.dateTime = DateTime.UtcNow;
+            session.Type = operation;
+            if (!string.IsNullOrEmpty(token))
+                session.Token = token;
+            if (authorised.HasValue)
+                session.Authorized = authorised.Value;
+            if (country.HasValue)
+                session.country = country.Value;
+            if (language.HasValue)
+                session.language = language.Value;
+            if (expire.HasValue)
+                session.expire = expire;
+            _context.PepsiSessions.Update(session);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task UZUpdate(UZSession session, UZOperType operation, Language? language = null)
         {
             session.dateTime = DateTime.UtcNow;

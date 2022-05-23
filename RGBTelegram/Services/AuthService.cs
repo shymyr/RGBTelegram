@@ -41,6 +41,26 @@ namespace RGBTelegram.Services
 
             return result.Entity;
         }
+        public async Task<PepsiAuthData> PepsiGetOrCreate(long ChatId, string phone = null)
+        {
+            var Auth = await _context.AuthPepsi.FirstOrDefaultAsync(x => x.ChatId == ChatId);
+
+            if (Auth != null)
+            {
+                if (!string.IsNullOrEmpty(phone))
+                {
+                    Auth.phone = phone;
+                    _context.AuthPepsi.Update(Auth);
+                    await _context.SaveChangesAsync();
+                }
+                return Auth;
+            }
+
+            var result = await _context.AuthPepsi.AddAsync(new PepsiAuthData() { ChatId = ChatId, phone = phone });
+            await _context.SaveChangesAsync();
+
+            return result.Entity;
+        }
 
         public async Task<AuthData> Update(AuthData auth, string phone = null, string passwod = null)
         {
@@ -53,7 +73,17 @@ namespace RGBTelegram.Services
 
             return auth;
         }
+        public async Task<PepsiAuthData> PepsiUpdate(PepsiAuthData auth, string phone = null, string passwod = null)
+        {
+            if (!string.IsNullOrEmpty(phone))
+                auth.phone = phone;
+            if (!string.IsNullOrEmpty(passwod))
+                auth.password = passwod;
+            _context.AuthPepsi.Update(auth);
+            await _context.SaveChangesAsync();
 
+            return auth;
+        }
         public async Task<Token> GetOrCreateToken()
         {
             var Auth = await _context.UZAuthToken.FirstOrDefaultAsync();

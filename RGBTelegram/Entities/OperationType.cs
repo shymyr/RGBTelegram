@@ -38,8 +38,9 @@ namespace RGBTelegram.Entities
         birth_month=94,
         birth_year=95,
         gender=96,
-        languageChange = 99
-
-
+        languageChange = 99,
+        restore = 101,
+        restoreSMS=102,
+        restoreNewPass=103
     }
 }

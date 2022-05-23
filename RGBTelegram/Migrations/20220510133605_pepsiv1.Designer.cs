@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RGBTelegram;
@@ -9,9 +10,10 @@ using RGBTelegram;
 namespace RGBTelegram.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220510133605_pepsiv1")]
+    partial class pepsiv1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,7 +45,7 @@ namespace RGBTelegram.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("AppUser");
                 });
 
             modelBuilder.Entity("RGBTelegram.Entities.AuthData", b =>
@@ -67,153 +69,7 @@ namespace RGBTelegram.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AuthDatas");
-                });
-
-            modelBuilder.Entity("RGBTelegram.Entities.PepsiAuthData", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<long>("ChatId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("password")
-                        .HasColumnType("text");
-
-                    b.Property<string>("phone")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AuthPepsi");
-                });
-
-            modelBuilder.Entity("RGBTelegram.Entities.PepsiRegistration", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<long>("ChatId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("birth_day")
-                        .HasColumnType("text");
-
-                    b.Property<int>("city_id")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("email")
-                        .HasColumnType("text");
-
-                    b.Property<string>("family_stat")
-                        .HasColumnType("text");
-
-                    b.Property<string>("first_name")
-                        .HasColumnType("text");
-
-                    b.Property<string>("gender")
-                        .HasColumnType("text");
-
-                    b.Property<string>("iin")
-                        .HasColumnType("text");
-
-                    b.Property<string>("last_name")
-                        .HasColumnType("text");
-
-                    b.Property<string>("middlename")
-                        .HasColumnType("text");
-
-                    b.Property<string>("password")
-                        .HasColumnType("text");
-
-                    b.Property<string>("phone")
-                        .HasColumnType("text");
-
-                    b.Property<int>("region_id")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("RegistrationsPepsi");
-                });
-
-            modelBuilder.Entity("RGBTelegram.Entities.PepsiSession", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<bool>("Authorized")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.Property<long?>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("country")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("dateTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<double?>("expire")
-                        .HasColumnType("double precision");
-
-                    b.Property<int>("language")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PepsiSessions");
-                });
-
-            modelBuilder.Entity("RGBTelegram.Entities.PepsiUser", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<long>("ChatId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("FirstName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("LastName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Username")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UsersPepsi");
+                    b.ToTable("AuthData");
                 });
 
             modelBuilder.Entity("RGBTelegram.Entities.Registration", b =>
@@ -267,34 +123,7 @@ namespace RGBTelegram.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Registrations");
-                });
-
-            modelBuilder.Entity("RGBTelegram.Entities.RestorePassword", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<long>("ChatID")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("new_password")
-                        .HasColumnType("text");
-
-                    b.Property<string>("phone")
-                        .HasColumnType("text");
-
-                    b.Property<string>("sms_code")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("RestorePassword");
+                    b.ToTable("Registration");
                 });
 
             modelBuilder.Entity("RGBTelegram.Entities.Token", b =>
@@ -451,16 +280,7 @@ namespace RGBTelegram.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserSessions");
-                });
-
-            modelBuilder.Entity("RGBTelegram.Entities.PepsiSession", b =>
-                {
-                    b.HasOne("RGBTelegram.Entities.PepsiUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
+                    b.ToTable("UserSession");
                 });
 
             modelBuilder.Entity("RGBTelegram.Entities.UZSession", b =>

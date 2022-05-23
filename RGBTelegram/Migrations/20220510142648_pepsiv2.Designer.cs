@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RGBTelegram;
@@ -9,9 +10,10 @@ using RGBTelegram;
 namespace RGBTelegram.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220510142648_pepsiv2")]
+    partial class pepsiv2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -268,33 +270,6 @@ namespace RGBTelegram.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Registrations");
-                });
-
-            modelBuilder.Entity("RGBTelegram.Entities.RestorePassword", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<long>("ChatID")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("new_password")
-                        .HasColumnType("text");
-
-                    b.Property<string>("phone")
-                        .HasColumnType("text");
-
-                    b.Property<string>("sms_code")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("RestorePassword");
                 });
 
             modelBuilder.Entity("RGBTelegram.Entities.Token", b =>

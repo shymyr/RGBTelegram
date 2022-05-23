@@ -35,21 +35,23 @@ namespace RGBTelegram
             services.AddSingleton<TelegramBot>();
             services.AddSingleton<AsuBot>();
             services.AddSingleton<PialaBot>();
+            services.AddSingleton<PepsiBot>();
             services.AddSingleton<ICommandExecutor, CommandExecutor>();
             services.AddSingleton<IUZCommExecutor, UZCommExecutor>();
-            //services.AddSingleton<IPepsiCommExecutor, PepsiCommExecutor>();
+            services.AddSingleton<IPepsiCommExecutor, PepsiCommExecutor>();
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<ISessionService, SessionService>();
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IServiceCall, ServiceCall>();
             services.AddSingleton<IRegService, RegService>();
             services.AddSingleton<ILanguageText, LanguageText>();
+            services.AddSingleton<IRestoreService, RestoreService>();
             services.AddSingleton<BaseCommand, MessageCommands>();
             services.AddSingleton<BaseCommand, CallbackCommands>();
             services.AddSingleton<UZBaseCommand, UZMessageCommands>();
             services.AddSingleton<UZBaseCommand, UZCallbackCommands>();
-            //services.AddSingleton<PepsiBaseCommand, PepsiMessageCommands>();
-            //services.AddSingleton<PepsiBaseCommand, PepsiCallbackCommands>();
+            services.AddSingleton<PepsiBaseCommand, PepsiMessageCommands>();
+            services.AddSingleton<PepsiBaseCommand, PepsiCallbackCommands>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -62,7 +64,7 @@ namespace RGBTelegram
             serviceProvider.GetRequiredService<TelegramBot>().GetBot().Wait();
             serviceProvider.GetRequiredService<AsuBot>().GetASUBot().Wait();
             serviceProvider.GetRequiredService<PialaBot>().GetPialaBot().Wait();
-            //serviceProvider.GetRequiredService<PepsiBot>().GetPepsiBot().Wait();
+            serviceProvider.GetRequiredService<PepsiBot>().GetPepsiBot().Wait();
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>

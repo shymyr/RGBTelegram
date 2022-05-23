@@ -47,7 +47,35 @@ namespace RGBTelegram.Services
 
             return result.Entity;
         }
+        public async Task<PepsiUser> PepsiGetOrCreate(Update update)
+        {
+            var newUser = update.Type switch
+            {
+                UpdateType.CallbackQuery => new PepsiUser
+                {
+                    Username = update.CallbackQuery.From.Username,
+                    ChatId = update.CallbackQuery.Message.Chat.Id,
+                    FirstName = update.CallbackQuery.Message.From.FirstName,
+                    LastName = update.CallbackQuery.Message.From.LastName
+                },
+                UpdateType.Message => new PepsiUser
+                {
+                    Username = update.Message.Chat.Username,
+                    ChatId = update.Message.Chat.Id,
+                    FirstName = update.Message.Chat.FirstName,
+                    LastName = update.Message.Chat.LastName
+                }
+            };
 
+            var user = await _context.UsersPepsi.FirstOrDefaultAsync(x => x.ChatId == newUser.ChatId);
+
+            if (user != null) return user;
+
+            var result = await _context.UsersPepsi.AddAsync(newUser);
+            await _context.SaveChangesAsync();
+
+            return result.Entity;
+        }
         public async Task<UZUser> GetUZUser(Update update)
         {
             var newUser = update.Type switch

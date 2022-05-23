@@ -10,6 +10,6 @@ namespace RGBTelegram.Commands
     public abstract class PepsiBaseCommand
     {
         public abstract string Name { get; }
-        public abstract Task ExecuteAsync(Update update, UserSession session);
+        public abstract Task ExecuteAsync(Update update, PepsiSession session);
     }
 }
