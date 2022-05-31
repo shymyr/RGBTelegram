@@ -74,6 +74,8 @@ namespace RGBTelegram.Services
                     dateTime = DateTime.UtcNow
                 }
             };
+            newSession.Authorized = false;
+            newSession.Adult = false;
             await _context.PepsiSessions.AddAsync(newSession);
             await _context.SaveChangesAsync();
             return newSession;
@@ -137,12 +139,14 @@ namespace RGBTelegram.Services
             _context.UserSessions.Update(session);
             await _context.SaveChangesAsync();
         }
-        public async Task PepsiUpdate(PepsiSession session, OperationType operation, string token = null, bool? authorised = null, Country? country = null, Language? language = null, double? expire = null)
+        public async Task PepsiUpdate(PepsiSession session, OperationType operation, string token = null, bool? adult = null, bool? authorised = null, Country? country = null, Language? language = null, double? expire = null)
         {
             session.dateTime = DateTime.UtcNow;
             session.Type = operation;
             if (!string.IsNullOrEmpty(token))
                 session.Token = token;
+            if (adult.HasValue)
+                session.Adult = adult.Value;
             if (authorised.HasValue)
                 session.Authorized = authorised.Value;
             if (country.HasValue)

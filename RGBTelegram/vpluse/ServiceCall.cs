@@ -40,7 +40,7 @@ namespace RGBTelegram.vpluse
         }
         public async Task<HttpResponseMessage> CallService(StringContent content, string action, string methodType, bool testConnect)
         {
-            string apiBaseUrl = testConnect ? "https://staging-gateway.vpluse.me/" : "https://gateway.vpluse.me/";
+            string apiBaseUrl = testConnect ? "https://gateway.vpluse.me/" : "https://gateway.vpluse.me/";
             string endpoint = apiBaseUrl + action;
             HttpResponseMessage Response = new HttpResponseMessage();
             using (HttpClient client = new HttpClient())
@@ -117,7 +117,7 @@ namespace RGBTelegram.vpluse
         }
         public async Task<HttpResponseMessage> CallServiceAuthorize(StringContent content, string action, string methodType, string token, bool testConnect)
         {
-            string apiBaseUrl = testConnect ? "https://staging-gateway.vpluse.me/" : "https://gateway.vpluse.me/"; //"https://gateway.vpluse.me/";
+            string apiBaseUrl = testConnect ? "https://gateway.vpluse.me/" : "https://gateway.vpluse.me/"; //"https://gateway.vpluse.me/";
             string endpoint = apiBaseUrl + action;
             HttpResponseMessage Response = new HttpResponseMessage();
             using (HttpClient client = new HttpClient())

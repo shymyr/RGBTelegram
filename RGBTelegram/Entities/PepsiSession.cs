@@ -11,6 +11,7 @@ namespace RGBTelegram.Entities
         [JsonIgnore]
         public PepsiUser User { get; set; }
         public bool Authorized { get; set; }
+        public bool? Adult { get; set; }
         public long? UserId { get; set; }
         public DateTime dateTime { get; set; } = DateTime.UtcNow;
         public OperationType Type { get; set; }

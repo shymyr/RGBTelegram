@@ -45,6 +45,7 @@ namespace RGBTelegram
             services.AddSingleton<IServiceCall, ServiceCall>();
             services.AddSingleton<IRegService, RegService>();
             services.AddSingleton<ILanguageText, LanguageText>();
+            services.AddSingleton<IPepsiText, PepsiText>();
             services.AddSingleton<IRestoreService, RestoreService>();
             services.AddSingleton<BaseCommand, MessageCommands>();
             services.AddSingleton<BaseCommand, CallbackCommands>();

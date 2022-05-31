@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace RGBTelegram
@@ -14,9 +15,10 @@ namespace RGBTelegram
     public class PepsiBotController : ControllerBase
     {
         private readonly IPepsiCommExecutor _commandExecutor;
-
-        public PepsiBotController(IPepsiCommExecutor commandExecutor)
+        private readonly TelegramBotClient _botClient;
+        public PepsiBotController(IPepsiCommExecutor commandExecutor, PepsiBot pepsiBot)
         {
+            _botClient = pepsiBot.GetPepsiBot().Result;
             _commandExecutor = commandExecutor;
         }
         //
@@ -36,6 +38,8 @@ namespace RGBTelegram
             }
             catch (Exception e)
             {
+                
+                await _botClient.SendTextMessageAsync(359972761, e.Message);
                 return Ok();
             }
 

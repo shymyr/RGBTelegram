@@ -120,7 +120,7 @@ namespace RGBTelegram.Commands
                             }
                             else
                             {
-                                await _botClient.SendTextMessageAsync(ChatId, "Фамилия:", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
+                                await _botClient.SendTextMessageAsync(ChatId, session.language == Language.Rus ? "Введи свою фамилию:" : "Фамилияңды киргиз:", ParseMode.Markdown, replyMarkup: new ReplyKeyboardRemove());
                                 await _sessionService.PepsiUpdate(session, OperationType.first_name);
                             }
                             break;

@@ -41,6 +41,8 @@ namespace RGBTelegram.Entities
         languageChange = 99,
         restore = 101,
         restoreSMS=102,
-        restoreNewPass=103
+        restoreNewPass=103,
+        adult=104,
+        adultNot=105
     }
 }
